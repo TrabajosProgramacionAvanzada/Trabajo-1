@@ -13,8 +13,7 @@ typedef struct nodeP{
 	long grd; //Grado
 	struct nodeP *next; //Puntero de tipo nodeP que apunta al siguiente.
   //struct nodeP *parent;
-}node; //¿Por qué está éste "node;" acá?
-		// porque asi se define el nombre de la estructura de datos
+}node;
 
 void push(node **head, long coef, long grd){
 	/*
