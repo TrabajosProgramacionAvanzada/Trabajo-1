@@ -111,7 +111,7 @@ void menu(node *head){
             if(head)
                 display(head);
             else{
-                printf("\nDebe ingresar un polinomio o generarlo antes de leerlo!\n")
+	      printf("\nDebe ingresar un polinomio o generarlo antes de leerlo!\n");
             }
         case 4:
             break;
