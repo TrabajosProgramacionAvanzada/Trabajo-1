@@ -1,16 +1,10 @@
-/*
-
-	Adjunto codigo, cada funcion explica que hace.
-    Compila de forma correcta. Un polinomio de grado 10.000.000
-    utiliza aprox 3.2gb de ram.
-*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
 
 
-typedef struct nodeP{						
+typedef struct nodeP{
 /*
 	Estructura linked list que permite almacenar coeficiente y grado
 	de un polinomio de la forma a(x)=(asub(n-1)*bsub(n-1))xexp(n-1)+A(x)
@@ -18,9 +12,7 @@ typedef struct nodeP{
 	long coef; //Coeficiente
 	long grd; //Grado
 	struct nodeP *next; //Puntero de tipo nodeP que apunta al siguiente.
-  //Ignacio:
   //struct nodeP *parent;
-  //Descomenten si creen correcto, pero habíamos dicho que sería doblemente enlazada por lo que necesitamos éste puntero
 }node; //¿Por qué está éste "node;" acá?
 		// porque asi se define el nombre de la estructura de datos
 
@@ -46,7 +38,7 @@ void display(node **head){
 		}else if(temp->coef>0){ // Sino
 			printf("+%ldx%ld", temp->coef, temp->grd); //Imprime con un signo menos.
 		}else{
-          printf("-%ldx%ld", temp->coef, temp->grd);
+          printf("%ldx%ld", temp->coef, temp->grd);
         }
 		temp=temp->next;//Mover al siguiente nodo en la lista.
 	}
@@ -65,7 +57,7 @@ long coefGenerator(long lsup){
 	}
 	return rand()%lsup;
 	/*
-		Incluyo esta funcion para facilitar las operaciones automaticas.
+		Incluimos esta funcion para facilitar las operaciones automaticas.
 		Solo es necesario mantener un polinomio en memoria. El siguiente lo
 		leemos ¿Paso por paso?, operando de forma inmediata con el monomio
 		siguiente. (Aplicable a suma y resta)
@@ -84,13 +76,55 @@ node *generator(long grado){
 	}
 	return head; //Devolver la linkedList
 }
+
+node *ingresar_plinomio(long grds){
+  node *head=NULL;
+  long coef=0;
+  long i=0;
+  for(i=grds; i>=0; i--){
+    scanf("%ld", &coef);
+    if(coef!=0){
+      push(&head, coef, i);
+    }
+  }
+  return head;
+}
+
+void menu(node *head){
+    int opcion=0;
+    long grdo =0;
+    do{
+
+        printf("1. generar polinomio \n2. leer polinomio \n3. opcion sair\n");
+        scanf("%d", &opcion);
+        switch(opcion){
+        case 1:
+            scanf("%ld",&grdo);
+            head=generator(grdo);
+            break;
+        case 2:
+            head=ingresar_plinomio(head);
+            break;
+        case 3:
+            break;
+            break;
+        default:
+            printf("Ingrese una opcion valida\n");
+            break;
+
+        }
+
+    }while(opcion != 3);
+
+}
+
+
 int main(){
+
+
+
 	srand(time(NULL));
 	node *head=NULL;
-	head=generator(100);
-	display(&head);
-  /*Ignacio:
-  Me parece que el display es al revés, se muestra desde el grado más alto al de menor grado al último
-  (y podríamos intentar quitarle el signo si es positivo a primer nodo que se muestre)*/
+	menu(head);
 	return 0;
 }
