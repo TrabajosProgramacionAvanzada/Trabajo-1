@@ -94,17 +94,26 @@ void menu(node *head){
     long grdo =0;
     do{
 
-        printf("1. generar polinomio \n2. leer polinomio \n3. opcion sair\n");
+        printf("1. generar polinomio \n2. ingresar polinomio \n3. opcion leer polinomio \n4. opcion sair\n");
         scanf("%d", &opcion);
         switch(opcion){
         case 1:
             scanf("%ld",&grdo);
             head=generator(grdo);
+            display(head);
             break;
         case 2:
-            head=ingresar_plinomio(head);
+	        scanf("%ld", &grdo);
+            head=ingresar_plinomio(grdo);
+            display(head);
             break;
         case 3:
+            if(head)
+                display(head);
+            else{
+                printf("\nDebe ingresar un polinomio o generarlo antes de leerlo!\n")
+            }
+        case 4:
             break;
             break;
         default:
@@ -113,7 +122,7 @@ void menu(node *head){
 
         }
 
-    }while(opcion != 3);
+    }while(opcion != 4);
 
 }
 
