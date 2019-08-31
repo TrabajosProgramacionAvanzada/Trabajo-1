@@ -3,7 +3,7 @@
   Compilador: GCC 9.1.0 
   Integrantes: 
   - Pedro Figueroa
-  - Javier Gómez
+  - Javier GÃ³mez
   - Ignacio Sanhueza
 */
 #include<stdio.h>
@@ -66,7 +66,7 @@ long coefGenerator(long lsup){
 	/*
 		Incluimos esta funcion para facilitar las operaciones automaticas.
 		Solo es necesario mantener un polinomio en memoria. El siguiente lo
-		leemos ¿Paso por paso?, operando de forma inmediata con el monomio
+		leemos Â¿Paso por paso?, operando de forma inmediata con el monomio
 		siguiente. (Aplicable a suma y resta)
 	*/
 }
@@ -84,12 +84,12 @@ node *generator(long grado){
 	return head; //Devolver la linkedList
 }
 
-//Función que pide cada coeficiente del polinomio de forma ordenada por el grado, de menor a mayor
+//FunciÃ³n que pide cada coeficiente del polinomio de forma ordenada por el grado, de menor a mayor
 node *ingresar_plinomio(long grds){
   node *head=NULL;
   long coef=0;
   long i=0;
-  for(i=grds; i>=0; i--){//Se recorre desde el grado 0 al grado máximo dado "grds"
+  for(i=grds; i>=0; i--){//Se recorre desde el grado 0 al grado mÃ¡ximo dado "grds"
     scanf("%ld", &coef);//Se pide el coeficiente del polinomio
     if(coef!=0){
       push(&head, coef, i);//Luego se une a la lista
@@ -98,10 +98,10 @@ node *ingresar_plinomio(long grds){
   return head;
 }
 
-//Función que elimina de la memoria la lista que contiene al polinomio
+//FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
 node *eliminar(node *head){
   node *copia = NULL;
-  copia = head;//Se copia para mantener el puntero del próximo nodo
+  copia = head;//Se copia para mantener el puntero del prÃ³ximo nodo
   while(head){
     copia = copia->next;//Se copia el siguiente
     free(head);//Se libera memoria
@@ -110,14 +110,14 @@ node *eliminar(node *head){
   return head;//Debe retornar NULL
 }
 
-//Función que despliega un menú para el usuario
+//FunciÃ³n que despliega un menÃº para el usuario
 void menu(node *head){
     int opcion=0;
     long grdo =0;
     do{
 
         printf("1. generar polinomio \n2. ingresar polinomio \n3. opcion leer polinomio  \n4. opcion sair\n");
-        scanf("%d", &opcion);//Se guarda la opción ingresada
+        scanf("%d", &opcion);//Se guarda la opciÃ³n ingresada
         switch(opcion){
         case 1:
             scanf("%ld",&grdo);
@@ -126,7 +126,7 @@ void menu(node *head){
             break;
         case 2:
 	    scanf("%ld", &grdo);
-	    head=eliminar(head);//Paso análogo al "case 1"
+	    head=eliminar(head);//Paso anÃ¡logo al "case 1"
             head=ingresar_plinomio(grdo);//Pide el polinomio al usuario
             break;
         case 3:
@@ -154,7 +154,7 @@ void menu(node *head){
 int main(){
 
 
-  srand(time(NULL));//Se inicaliza la semilla de la función srand()
+  srand(time(NULL));//Se inicaliza la semilla de la funciÃ³n srand()
 	node *head=NULL;
 	menu(head);
 	return 0;
