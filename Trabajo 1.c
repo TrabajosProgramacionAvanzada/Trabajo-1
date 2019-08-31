@@ -1,3 +1,11 @@
+/*Programa en 64 bits:
+  Programa para generar polinomios de grado n, o ingresarlos, y leerlos
+  Compilador: GCC 9.1.0 
+  Integrantes: 
+  - Pedro Figueroa
+  - Javier Gómez
+  - Ignacio Sanhueza
+*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
@@ -58,7 +66,7 @@ long coefGenerator(long lsup){
 	/*
 		Incluimos esta funcion para facilitar las operaciones automaticas.
 		Solo es necesario mantener un polinomio en memoria. El siguiente lo
-		leemos Â¿Paso por paso?, operando de forma inmediata con el monomio
+		leemos ¿Paso por paso?, operando de forma inmediata con el monomio
 		siguiente. (Aplicable a suma y resta)
 	*/
 }
@@ -76,43 +84,61 @@ node *generator(long grado){
 	return head; //Devolver la linkedList
 }
 
+//Función que pide cada coeficiente del polinomio de forma ordenada por el grado, de menor a mayor
 node *ingresar_plinomio(long grds){
   node *head=NULL;
   long coef=0;
   long i=0;
-  for(i=grds; i>=0; i--){
-    scanf("%ld", &coef);
+  for(i=grds; i>=0; i--){//Se recorre desde el grado 0 al grado máximo dado "grds"
+    scanf("%ld", &coef);//Se pide el coeficiente del polinomio
     if(coef!=0){
-      push(&head, coef, i);
+      push(&head, coef, i);//Luego se une a la lista
     }
   }
   return head;
 }
 
+//Función que elimina de la memoria la lista que contiene al polinomio
+node *eliminar(node *head){
+  node *copia = NULL;
+  copia = head;//Se copia para mantener el puntero del próximo nodo
+  while(head){
+    copia = copia->next;//Se copia el siguiente
+    free(head);//Se libera memoria
+    head = copia;//Se pasa al siguiente nodo
+  }
+  return head;//Debe retornar NULL
+}
+
+//Función que despliega un menú para el usuario
 void menu(node *head){
     int opcion=0;
     long grdo =0;
     do{
 
-        printf("1. generar polinomio \n2. ingresar polinomio \n3. opcion leer polinomio \n4. opcion sair\n");
-        scanf("%d", &opcion);
+        printf("1. generar polinomio \n2. ingresar polinomio \n3. opcion leer polinomio  \n4. opcion sair\n");
+        scanf("%d", &opcion);//Se guarda la opción ingresada
         switch(opcion){
         case 1:
             scanf("%ld",&grdo);
-            head=generator(grdo);
+	    head=eliminar(head);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
             break;
         case 2:
-	        scanf("%ld", &grdo);
-            head=ingresar_plinomio(grdo);
+	    scanf("%ld", &grdo);
+	    head=eliminar(head);//Paso análogo al "case 1"
+            head=ingresar_plinomio(grdo);//Pide el polinomio al usuario
             break;
         case 3:
-            if(head)
-                display(&head);
+	  if(head)//Si la cabeza de la lista no es NULL
+	    display(&head);//Se muestra
             else{
 	      printf("\nDebe ingresar un polinomio o generarlo antes de leerlo!\n");
             }
+	    break;
         case 4:
             break ;
+	    head=eliminar(head);//Elimina la memoria antes de cerrar el programa
             break;
         default:
             printf("Ingrese una opcion valida\n");
@@ -128,8 +154,7 @@ void menu(node *head){
 int main(){
 
 
-
-	srand(time(NULL));
+  srand(time(NULL));//Se inicaliza la semilla de la función srand()
 	node *head=NULL;
 	menu(head);
 	return 0;
