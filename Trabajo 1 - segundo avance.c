@@ -12,7 +12,7 @@ typedef struct nodeP {
   long grd;           // Grado
   struct nodeP *next; // Puntero de tipo nodeP que apunta al siguiente.
   // struct nodeP *parent; //Puntero de tipo nodeP que apunta al anterior
-  //struct nodeP *last_member; //Puntero que apunta al �ltimo si y s�lo si es la cabeza de la lista
+  //struct nodeP *last_member; //Puntero que apunta al último si y sólo si es la cabeza de la lista
 } node;
 
 void push(node **head, long coef, long grd) {
@@ -73,7 +73,7 @@ long coefGenerator(long lsup) {
   /*
           Incluimos esta funcion para facilitar las operaciones automaticas.
           Solo es necesario mantener un polinomio en memoria. El siguiente lo
-          leemos ¿Paso por paso?, operando de forma inmediata con el monomio
+          leemos Â¿Paso por paso?, operando de forma inmediata con el monomio
           siguiente. (Aplicable a suma y resta)
   */
 }
@@ -84,7 +84,7 @@ node *generator(long grado) {
   */
   node *head = NULL;      // Crear la lista
   long i = 0;             // Variable que itera en el for
-  long long lSup = pow(2, 31); // Se define el limite superior de los coeficientes
+  long long lSup = (long long int) pow(2, 63); // Se define el limite superior de los coeficientes
   for (i = grado; i >= 0; i--) { // Iterar desde el mayor al menor. para de esta
                                  // manera tener la linkedlist en orden natural
     push(&head, coefGenerator(lSup),
@@ -93,14 +93,14 @@ node *generator(long grado) {
   return head; // Devolver la linkedList
 }
 
-// Función que pide cada coeficiente del polinomio de forma ordenada por el
+// FunciÃ³n que pide cada coeficiente del polinomio de forma ordenada por el
 // grado, de menor a mayor
 node *ingresar_plinomio(long grds) {
   node *head = NULL;
   long coef = 0;
   long i = 0;
   for (i = grds; i >= 0;
-       i--) { // Se recorre desde el grado 0 al grado máximo dado "grds"
+       i--) { // Se recorre desde el grado 0 al grado mÃ¡ximo dado "grds"
     scanf("%ld", &coef); // Se pide el coeficiente del polinomio
     if (coef != 0) {
       push(&head, coef, i); // Luego se une a la lista
@@ -171,10 +171,10 @@ node *restaPolinomios(node *p1, node *p2) {
   return pFinal;
 }
 
-// Función que elimina de la memoria la lista que contiene al polinomio
+// FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
 node *eliminar(node *head) {
   node *copia = NULL;
-  copia = head; // Se copia para mantener el puntero del próximo nodo
+  copia = head; // Se copia para mantener el puntero del prÃ³ximo nodo
   while (head) {
     copia = copia->next; // Se copia el siguiente
     free(head);          // Se libera memoria
@@ -183,7 +183,7 @@ node *eliminar(node *head) {
   return head; // Debe retornar NULL
 }
 
-// Función que despliega un menú para el usuario
+// FunciÃ³n que despliega un menÃº para el usuario
 void menu(node *head1, node *head2) {
   int opcion = 0;
   long grdo1 = 0;
@@ -193,7 +193,7 @@ void menu(node *head1, node *head2) {
 
     printf("1. sumar dos polinomios generados \n2. restar dos polinomios "
            "generados \n3. copiar un polinomio ingresado \n4. opcion sair\n");
-    scanf("%d", &opcion); // Se guarda la opción ingresada
+    scanf("%d", &opcion); // Se guarda la opciÃ³n ingresada
     switch (opcion) {
     case 1:
       scanf("%ld", &grdo1);
@@ -236,7 +236,7 @@ void menu(node *head1, node *head2) {
       break;
     case 3:      
       scanf("%ld", &grdo1);
-      head1=eliminar(head1);//Paso análogo al "case 1"
+      head1=eliminar(head1);//Paso anÃ¡logo al "case 1"
       head2=eliminar(head2);
       aux=eliminar(aux);
       head1=ingresar_plinomio(grdo1);//Pide el polinomio al usuario
@@ -262,7 +262,7 @@ void menu(node *head1, node *head2) {
 }
 
 int main() {
-  srand(time(NULL)); // Se inicaliza la semilla de la función srand()
+  srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
   menu(head1, head2);
