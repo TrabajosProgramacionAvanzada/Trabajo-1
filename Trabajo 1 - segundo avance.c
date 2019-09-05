@@ -11,7 +11,8 @@ typedef struct nodeP {
   long coef;          // Coeficiente
   long grd;           // Grado
   struct nodeP *next; // Puntero de tipo nodeP que apunta al siguiente.
-  // struct nodeP *parent;
+  // struct nodeP *parent; //Puntero de tipo nodeP que apunta al anterior
+  //struct nodeP *last_member; //Puntero que apunta al ˙ltimo si y sÛlo si es la cabeza de la lista
 } node;
 
 void push(node **head, long coef, long grd) {
@@ -24,13 +25,18 @@ void push(node **head, long coef, long grd) {
   nNode->next = *head;                // Apuntar a head
   *head = nNode;                      // Igualar head al nodo temporal.
 }
+
 // Funcion copia
-void copy(node *P1, node *copia) {
+node *copy(node *P1) {
+  node *copia = NULL;
   while (P1 != NULL) {
     push(&copia, P1->coef, P1->grd);
     P1 = P1->next;
   }
+  return copia;
 }
+
+
 void display(node **head) {
   /*
           Funcion que muestra el polinomio
@@ -40,11 +46,11 @@ void display(node **head) {
   while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0 &&
         temp->grd == 0) { // Si el coeficiente es mayor que cero
-      printf("%ldx%ld", temp->coef, temp->grd);  // Imprime con un signo mas.
+      printf(" %ld x^%ld ", temp->coef, temp->grd);  // Imprime con un signo mas.
     } else if (temp->coef > 0) {                 // Sino
-      printf("+%ldx%ld", temp->coef, temp->grd); // Imprime con un signo menos.
+      printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo menos.
     } else {
-      printf("%ldx%ld", temp->coef, temp->grd);
+      printf(" %ld x^%ld ", temp->coef, temp->grd);
     }
     temp = temp->next; // Mover al siguiente nodo en la lista.
   }
@@ -78,7 +84,7 @@ node *generator(long grado) {
   */
   node *head = NULL;      // Crear la lista
   long i = 0;             // Variable que itera en el for
-  long lSup = pow(2, 31); // Se define el limite superior de los coeficientes
+  long long lSup = pow(2, 31); // Se define el limite superior de los coeficientes
   for (i = grado; i >= 0; i--) { // Iterar desde el mayor al menor. para de esta
                                  // manera tener la linkedlist en orden natural
     push(&head, coefGenerator(lSup),
@@ -186,7 +192,7 @@ void menu(node *head1, node *head2) {
   do {
 
     printf("1. sumar dos polinomios generados \n2. restar dos polinomios "
-           "generados \n3. opcion sair\n");
+           "generados \n3. copiar un polinomio ingresado \n4. opcion sair\n");
     scanf("%d", &opcion); // Se guarda la opci√≥n ingresada
     switch (opcion) {
     case 1:
@@ -204,7 +210,9 @@ void menu(node *head1, node *head2) {
       printf("\n+--------------------------------------------------------------"
              "--------\n");
       aux = sumarPolinomios(head1, head2);
-      display(&aux);
+      head2 = eliminar(head2);
+      head2 = copy(aux);
+      display(&head2);
       break;
     case 2:
       scanf("%ld", &grdo1);
@@ -221,10 +229,25 @@ void menu(node *head1, node *head2) {
       printf("\n-  "
              "-----------------------------------------------------------------"
              "-----\n");
-      aux = sumarPolinomios(head1, head2);
+      aux = restaPolinomios(head1, head2);
+      head2 = eliminar(head2);
+      head2 = copy(aux);
+      display(&head2);
+      break;
+    case 3:      
+      scanf("%ld", &grdo1);
+      head1=eliminar(head1);//Paso an√°logo al "case 1"
+      head2=eliminar(head2);
+      aux=eliminar(aux);
+      head1=ingresar_plinomio(grdo1);//Pide el polinomio al usuario
+      head2 = copy(head1);
+      aux = copy(head2);
+      printf("\nEl polinomio ingresado:\n");
+      display(&head1);
+      printf("\nEl polinomio copiado:\n");
       display(&aux);
       break;
-    case 3:
+    case 4:
       break;
       head1 = eliminar(head1); // Elimina la memoria antes de cerrar el programa
       head2 = eliminar(head2);
@@ -235,7 +258,7 @@ void menu(node *head1, node *head2) {
       break;
     }
 
-  } while (opcion != 3);
+  } while (opcion != 4);
 }
 
 int main() {
