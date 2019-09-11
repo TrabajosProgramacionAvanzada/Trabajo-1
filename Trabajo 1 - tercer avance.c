@@ -53,6 +53,7 @@ node *copy(node *P1) {
   return copia;
 }
 
+
 void display(node **head) {
   /*
     Funcion que muestra el polinomio
