@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-typedef struct nodeP{
+typedef struct nodeP {
   /*
     Estructura linked list que permite almacenar coeficiente y grado
     de un polinomio de la forma a(x)=(asub(n-1)*bsub(n-1))xexp(n-1)+A(x)
@@ -12,35 +12,30 @@ typedef struct nodeP{
   long grd;           // Grado
   struct nodeP *next; // Puntero de tipo nodeP que apunta al siguiente.
   // struct nodeP *parent; //Puntero de tipo nodeP que apunta al anterior
-  //struct nodeP *last_member; //Puntero que apunta al último si y sólo si es la cabeza de la lista
+  // struct nodeP *last_member; //Puntero que apunta al último si y sólo si es
+  // la cabeza de la lista
 } node;
 
 void push(node **head, long coef, long grd) {
   /*
     Inserta el elemento al inicio de la linkedList.
   */
+  node *aux;
   node *nNode = malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;                 // Asignar coef a coef
   nNode->grd = grd;                   // Asignar el grado
-  if(head==NULL){
-    nNode->next = *head;                // Apuntar a head
-    *head = nNode; // Igualar head al nodo temporal.
-  }else{
-    if((*head)->grd <= grd){
-      nNode->next = *head;                // Apuntar a head
-      *head = nNode; // Igualar head al nodo temporal.
-    }
-    if((*head)->grd>grd){
-      while((*head)->next->grd>grd || head!=NULL){
-	*head=(*head)->next;
-      }
-      node *aux=NULL;
-      aux=(*head)->next;
-      (*head)->next=nNode;
 
+  if (*head == NULL || (*head)->grd < grd) {
+    nNode->next = *head; // Apuntar a head
+    *head = nNode;       // Igualaron head al nodo temporal.
+  } else {
+    aux = (*head);
+    while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
+      aux = aux->next;
     }
+    nNode->next = aux->next;
+    aux->next = nNode;
   }
-	                     
 }
 
 // Funcion copia
@@ -53,7 +48,6 @@ node *copy(node *P1) {
   return copia;
 }
 
-
 void display(node **head) {
   /*
     Funcion que muestra el polinomio
@@ -63,9 +57,10 @@ void display(node **head) {
   while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0 &&
         temp->grd == 0) { // Si el coeficiente es mayor que cero
-      printf(" %ld x^%ld ", temp->coef, temp->grd);  // Imprime con un signo mas.
-    } else if (temp->coef > 0) {                 // Sino
-      printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo menos.
+      printf(" %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
+    } else if (temp->coef > 0) {                    // Sino
+      printf("+ %ld x^%ld ", temp->coef,
+             temp->grd); // Imprime con un signo menos.
     } else {
       printf(" %ld x^%ld ", temp->coef, temp->grd);
     }
@@ -99,9 +94,10 @@ node *generator(long grado) {
     Funcion que devuelve una linkedList que contiene un polinomio de la
     forma a(x)=(asub(n-1)*bsub(n-1))xexp(n-1)+A(x)
   */
-  node *head = NULL;      // Crear la lista
-  long i = 0;             // Variable que itera en el for
-  long long lSup = (long long int) pow(2, 63); // Se define el limite superior de los coeficientes
+  node *head = NULL; // Crear la lista
+  long i = 0;        // Variable que itera en el for
+  long long lSup = (long long int)pow(
+      2, 63); // Se define el limite superior de los coeficientes
   for (i = grado; i >= 0; i--) { // Iterar desde el mayor al menor. para de esta
                                  // manera tener la linkedlist en orden natural
     push(&head, coefGenerator(lSup),
@@ -129,7 +125,7 @@ node *ingresar_plinomio(long grds) {
 // Funcion que suma dos polinomios
 node *sumarPolinomios(node *p1, node *p2) {
   node *pFinal =
-    NULL; // Puntero nodo, vacio, que contendra la suma de dos polinomios.
+      NULL; // Puntero nodo, vacio, que contendra la suma de dos polinomios.
   while (p1 && p2) {
     if (p1->grd == p2->grd) {
       push(&pFinal, p1->coef + p2->coef, p1->grd); // Inserta la suma en pFinal;
@@ -187,21 +183,39 @@ node *restaPolinomios(node *p1, node *p2) {
   }
   return pFinal;
 }
-node *multiplicarPolinomio(node *p1, node *p2){
-  node *cP1=NULL;
-  node *rMult=NULL;
-  node *mSum=NULL;
-  cP1=p1;
-  while(p2!=NULL){
-    while(cP1!=NULL){
-      push(&rMult, (long)(cP1->coef)*(long)(p2->coef), (cP1->grd)+(p2->grd));
-      cP1=cP1->next;
+node *multiplicarPolinomio(node *p1, node *p2) {
+  node *cP1 = NULL;
+  node *rMult = NULL;
+  cP1 = p1;
+  while (p2 != NULL) {
+    while (cP1 != NULL) {
+      push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
+           (cP1->grd) + (p2->grd));
+      cP1 = cP1->next;
     }
-    mSum=sumarPolinomios(rMult, mSum);
     p2 = p2->next;
-    cP1=p1;
+    cP1 = p1;
   }
-  return mSum;
+  return rMult;
+}
+node *sumagrdIguales(node *p) {
+  long n = 0;
+  node *final = NULL;
+  while (p->next != NULL) {
+    if (p->grd == p->next->grd) {
+      n = n + (p->coef + p->next->coef);
+    } else {
+      if (n > 0) {
+        push(&final, n, p->grd);
+        n = 0;
+      } else {
+        push(&final, p->coef, p->grd);
+      }
+    }
+    p = p->next;
+  }
+  push(&final, p->coef, p->grd);
+  return final;
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -236,7 +250,7 @@ void menu(node *head1, node *head2) {
                                // polinomio creado en la lista
       head2 = eliminar(head2);
       head1 = generator(
-			grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
+          grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
       display(&head1);
       display(&head2);
@@ -255,7 +269,7 @@ void menu(node *head1, node *head2) {
                                // polinomio creado en la lista
       head2 = eliminar(head2);
       head1 = generator(
-			grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
+          grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
       display(&head1);
       display(&head2);
@@ -267,12 +281,12 @@ void menu(node *head1, node *head2) {
       head2 = copy(aux);
       display(&head2);
       break;
-    case 3:      
+    case 3:
       scanf("%ld", &grdo1);
-      head1=eliminar(head1);//Paso anÃ¡logo al "case 1"
-      head2=eliminar(head2);
-      aux=eliminar(aux);
-      head1=ingresar_plinomio(grdo1);//Pide el polinomio al usuario
+      head1 = eliminar(head1); // Paso anÃ¡logo al "case 1"
+      head2 = eliminar(head2);
+      aux = eliminar(aux);
+      head1 = ingresar_plinomio(grdo1); // Pide el polinomio al usuario
       head2 = copy(head1);
       aux = copy(head2);
       printf("\nEl polinomio ingresado:\n");
@@ -298,13 +312,26 @@ int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
-  node *P=NULL;
-  //menu(head1, head2);
-  push(&head1, 1, 1);
-  push(&head1, 1, 0);
-  push(&head2, 1, 1);
-  push(&head2, 1, 0);
-  P=multiplicarPolinomio(head1, head2);
+  node *head3 = NULL;
+  node *P = NULL;
+  int exp = 0;
+  // menu(head1, head2);
+  head1 = generator(500);
+  head2 = generator(500);
+  head3 = generator(500);
+  display(&head1);
+  display(&head2);
+  display(&head3);
+  P = multiplicarPolinomio(head1, head2);
+  eliminar(head1);
+  eliminar(head2);
+  display(&P);
+  P = sumagrdIguales(P);
+  display(&P);
+  P = multiplicarPolinomio(P, head3);
+  display(&P);
+  eliminar(head3);
+  P = sumagrdIguales(P);
   display(&P);
   return 0;
 }
