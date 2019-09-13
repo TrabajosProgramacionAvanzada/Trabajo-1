@@ -316,9 +316,9 @@ int main() {
   node *P = NULL;
   int exp = 0;
   // menu(head1, head2);
-  head1 = generator(500);
-  head2 = generator(500);
-  head3 = generator(500);
+  head1 = generator(10);
+  head2 = generator(10);
+  head3 = generator(10);
   display(&head1);
   display(&head2);
   display(&head3);
