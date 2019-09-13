@@ -333,5 +333,6 @@ int main() {
   eliminar(head3);
   P = sumagrdIguales(P);
   display(&P);
+  eliminar(P);
   return 0;
 }
