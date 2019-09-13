@@ -305,11 +305,10 @@ void menu(node *head1, node *head2) {
       aux = eliminar(aux);
       head1 = ingresar_plinomio(grdo1); // Pide el polinomio al usuario
       head2 = copy(head1);
-      aux = copy(head2);
       printf("\nEl polinomio ingresado:\n");
       display(&head1);
       printf("\nEl polinomio copiado:\n");
-      display(&aux);
+      display(&head2);
       break;
     case 4:
       printf("\nIngrese el grado maximo del primer polinomio: ");
