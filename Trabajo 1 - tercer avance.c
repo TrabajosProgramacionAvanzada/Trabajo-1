@@ -54,6 +54,14 @@ void display(node **head) {
   */
   node *temp;            // Crear nodo temporal
   temp = *head;          // Igualar el nodo temporal a nuestra head
+  if (temp->coef > 0 &&) { // Si el coeficiente es mayor que cero
+      printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
+    } else if (temp->coef < 0) {                    // Sino
+      printf("- %ld x^%ld ", temp->coef,
+             temp->grd); // Imprime con un signo menos.
+    }
+  temp = temp->next;
+  //Mostramos el primer elemento antes del bucle para evitar el signo positivo de haber
   while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0 &&
         temp->grd == 0) { // Si el coeficiente es mayor que cero
