@@ -57,7 +57,7 @@ void display(node **head) {
   while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0 &&
         temp->grd == 0) { // Si el coeficiente es mayor que cero
-      printf(" %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
+      printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
     } else if (temp->coef > 0) {                    // Sino
       printf("+ %ld x^%ld ", temp->coef,
              temp->grd); // Imprime con un signo menos.
