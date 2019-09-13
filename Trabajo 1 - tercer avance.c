@@ -238,12 +238,14 @@ void menu(node *head1, node *head2) {
   node *aux = NULL;
   do {
 
-    printf("1. sumar dos polinomios generados \n2. restar dos polinomios "
-           "generados \n3. copiar un polinomio ingresado \n4. opcion sair\n");
+    printf("\n1. sumar dos polinomios generados \n2. restar dos polinomios "
+           "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos polinomios generados  \n5. opcion sair\n");
     scanf("%d", &opcion); // Se guarda la opciÃ³n ingresada
     switch (opcion) {
     case 1:
+      printf("\nIngrese el grado maximo del primer polinomio: ");
       scanf("%ld", &grdo1);
+      printf("\nIngrese el grado maximo del segundo polinomio: ");
       scanf("%ld", &grdo2);
       aux = eliminar(aux);
       head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
@@ -252,17 +254,21 @@ void menu(node *head1, node *head2) {
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
+      printf("\nEl primer polinomio generado:\n\n");
       display(&head1);
+      printf("\nEl segundo polinomio generado:\n\n");
       display(&head2);
       printf("\n+--------------------------------------------------------------"
-             "--------\n");
+             "--------\n\n");
       aux = sumarPolinomios(head1, head2);
       head2 = eliminar(head2);
       head2 = copy(aux);
       display(&head2);
       break;
     case 2:
+      printf("\nIngrese el grado maximo del primer polinomio: ");
       scanf("%ld", &grdo1);
+      printf("\nIngrese el grado maximo del segundo polinomio: ");
       scanf("%ld", &grdo2);
       aux = eliminar(aux);
       head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
@@ -271,17 +277,20 @@ void menu(node *head1, node *head2) {
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
+      printf("\nEl primer polinomio generado:\n\n");
       display(&head1);
+      printf("\nEl segundo polinomio generado:\n\n");
       display(&head2);
       printf("\n-  "
              "-----------------------------------------------------------------"
-             "-----\n");
+             "-----\n\n");
       aux = restaPolinomios(head1, head2);
       head2 = eliminar(head2);
       head2 = copy(aux);
       display(&head2);
       break;
     case 3:
+      printf("\nIngrese el grado maximo del polinomio: ");
       scanf("%ld", &grdo1);
       head1 = eliminar(head1); // Paso anÃ¡logo al "case 1"
       head2 = eliminar(head2);
@@ -295,6 +304,31 @@ void menu(node *head1, node *head2) {
       display(&aux);
       break;
     case 4:
+      printf("\nIngrese el grado maximo del primer polinomio: ");
+      scanf("%ld", &grdo1);
+      printf("\nIngrese el grado maximo del segundo polinomio: ");
+      scanf("%ld", &grdo2);
+      aux = eliminar(aux);
+      head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
+                               // polinomio creado en la lista
+      head2 = eliminar(head2);
+      head1 = generator(
+          grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
+      head2 = generator(grdo2);
+      printf("\nEl primer polinomio generado:\n\n");
+      display(&head1);
+      printf("\nEl segundo polinomio generado:\n\n");
+      display(&head2);
+      printf("\nx  "
+             "-----------------------------------------------------------------"
+             "-----\n\n");
+      aux = multiplicarPolinomio(head1, head2);
+      head1 = eliminar(head1);
+      head2 = eliminar(head2);
+      aux = sumagrdIguales(aux);
+      display(&aux);
+      break;
+    case 5:
       break;
       head1 = eliminar(head1); // Elimina la memoria antes de cerrar el programa
       head2 = eliminar(head2);
@@ -305,34 +339,16 @@ void menu(node *head1, node *head2) {
       break;
     }
 
-  } while (opcion != 4);
+  } while (opcion != 5);
 }
 
 int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
-  node *head3 = NULL;
   node *P = NULL;
-  int exp = 0;
-  // menu(head1, head2);
-  head1 = generator(10);
-  head2 = generator(10);
-  head3 = generator(10);
-  display(&head1);
-  display(&head2);
-  display(&head3);
-  P = multiplicarPolinomio(head1, head2);
-  eliminar(head1);
-  eliminar(head2);
-  display(&P);
-  P = sumagrdIguales(P);
-  display(&P);
-  P = multiplicarPolinomio(P, head3);
-  display(&P);
-  eliminar(head3);
-  P = sumagrdIguales(P);
-  display(&P);
-  eliminar(P);
+  long exp = 0;
+  char p;
+  menu(head1, head2);
   return 0;
 }
