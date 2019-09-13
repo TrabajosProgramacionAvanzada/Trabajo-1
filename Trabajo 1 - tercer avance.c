@@ -52,15 +52,16 @@ void display(node **head) {
   /*
     Funcion que muestra el polinomio
   */
-  node *temp;           // Crear nodo temporal
-  temp = *head;         // Igualar el nodo temporal a nuestra head
-  if (temp->coef > 0) { // Si el coeficiente es mayor que cero
+  node *temp;                   // Crear nodo temporal
+  temp = *head;                 // Igualar el nodo temporal a nuestra head
+  if (temp && temp->coef > 0) { // Si el coeficiente es mayor que cero
     printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
-  } else if (temp->coef < 0) {                   // Sino
+    temp = temp->next;
+  } else if (temp && temp->coef < 0) { // Sino
     printf("- %ld x^%ld ", temp->coef * -1,
            temp->grd); // Imprime con un signo menos.
+    temp = temp->next;
   }
-  temp = temp->next;
   // Mostramos el primer elemento antes del bucle para evitar el signo positivo
   // de haber
   while (temp != NULL) {  // Mientras el nodo temporal sea distinto de NULL
