@@ -72,7 +72,7 @@ void display(node **head) {
       printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
     } else {
        if(temp->grd == 0){
-	printf("- %ld ", temp->coef);
+	printf("- %ld ", temp->coef * -1);
 	temp = temp->next; // Mover al siguiente nodo en la lista.
 	continue;
       }
