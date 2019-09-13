@@ -66,12 +66,14 @@ void display(node **head) {
     if (temp->coef > 0) { // Si el coeficiente es mayor que cero
       if(temp->grd == 0){
 	printf("+ %ld ", temp->coef);
+	temp = temp->next; // Mover al siguiente nodo en la lista.
 	continue;
       }
       printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
     } else {
        if(temp->grd == 0){
 	printf("- %ld ", temp->coef);
+	temp = temp->next; // Mover al siguiente nodo en la lista.
 	continue;
       }
       printf("- %ld x^%ld ", temp->coef * -1, temp->grd);
