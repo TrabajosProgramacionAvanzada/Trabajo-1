@@ -221,7 +221,7 @@ node *sumagrdIguales(node *p) {
 }
 
 
-node *multiplicarPolinomioFBrut(node *p1, node *p2) {
+node *multiplicarPolinomioFBrut(node *p1, node *p2) {//Función a fuerza bruta
   node *cP1 = NULL;
   node *rMult = NULL;
   cP1 = p1;
@@ -237,7 +237,7 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) {
   return rMult;
 }
 
-node *multiplicarConstXPolin(long Cons, node *pol) {
+node *multiplicarConstXPolin(long Cons, node *pol) {//Multiplica una constante por un polinomio
   node *cP = NULL;
   node *rMult = NULL;
   cP = pol;
@@ -248,11 +248,11 @@ node *multiplicarConstXPolin(long Cons, node *pol) {
   return rMult;
 }
 
-node *multiplicarPolinomioRyConc(node *p1, node *p2) {
+node *multiplicarPolinomioRyConc(node *p1, node *p2) {//Reducir y conquitar a(x) = a(n-1)X^(n-1) + A(x) b(x) = b(n-1)X^(n-1) + B(x)
   node *rMult = NULL;
   node *aux = NULL;
-  push(&aux, (long) (p1->coef) * (long) (p2->coef), (long) (p1->grd) + (long) (p2->grd));
-  rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));
+  aux =  multiplicarConstXPolin(p1->coef,p2);//Guardo el primer término de la suma (a(n-1)x b(x))X(n-1) 
+  rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));//Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
   return sumagrdIguales(rMult);
 }
 
