@@ -34,12 +34,15 @@ void push(node **head, long coef, long grd) {
     while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
       aux = aux->next;
     }
+    if ( (long)aux->grd == (long)nNode->grd){
+      nNode->coef = aux->coef + coef;
+    }
     nNode->next = aux->next;
     aux->next = nNode;
   }
 }
 
-// Funcion copia
+// Funcion copiagith
 node *copy(node *P1) {
   node *copia = NULL;
   while (P1 != NULL) {
@@ -235,6 +238,7 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) {//Función a fuerza bruta
     cP1 = p1;
   }
   return rMult;
+  
 }
 
 node *multiplicarConstXPolin(long Cons, node *pol) {//Multiplica una constante por un polinomio
@@ -278,7 +282,7 @@ void menu(node *head1, node *head2) {
 
     printf("\n1. sumar dos polinomios generados \n2. restar dos polinomios "
            "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos polinomios generados  \n5. opcion sair\n");
-    scanf("%d", &opcion); // Se guarda la opciÃ³n ingresada
+    scanf("%d", &opcion); // Se guarda la opción ingresada
     switch (opcion) {
     case 1:
       printf("\nIngrese el grado maximo del primer polinomio: ");
