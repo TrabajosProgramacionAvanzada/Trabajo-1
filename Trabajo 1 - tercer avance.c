@@ -398,8 +398,6 @@ int main() {
   
   node *head2 = NULL;
   node *P = NULL;
-  long exp = 0;
-  char p;
   menu(head1, head2);
   return 0;
 }
