@@ -21,6 +21,7 @@ void push(node **head, long coef, long grd) {
     Inserta el elemento al inicio de la linkedList.
   */
   node *aux;
+  node *aux1 = NULL;
   node *nNode = malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;                 // Asignar coef a coef
   nNode->grd = grd;                   // Asignar el grado
@@ -29,16 +30,23 @@ void push(node **head, long coef, long grd) {
     nNode->next = *head; // Apuntar a head
     *head = nNode;       // Igualaron head al nodo temporal.
   } else {
-    
     aux = (*head);
-    while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
+    if ((long)aux->grd == grd){
+      aux->coef = aux->coef + coef;
+      free(nNode);
+      return;
+    }
+    while (aux != NULL && (long)aux->grd > grd) {
+      aux1 = aux;
       aux = aux->next;
     }
-    if ( (long)aux->grd == (long)nNode->grd){
-      nNode->coef = aux->coef + coef;
+    if (aux != NULL && (long)aux->grd == grd){
+      aux->coef = aux->coef + coef;
+      free(nNode);
+      return;
     }
-    nNode->next = aux->next;
-    aux->next = nNode;
+    nNode->next = aux1->next;
+    aux1->next = nNode;
   }
 }
 
@@ -221,20 +229,21 @@ node *sumagrdIguales(node *p) {
   }
   push(&final, p->coef, p->grd);
   return final;
-}
+  }
+
 
 
 node *multiplicarPolinomioFBrut(node *p1, node *p2) {//Función a fuerza bruta
   node *cP1 = NULL;
   node *rMult = NULL;
   cP1 = p1;
-  while (p2 != NULL) {
-    while (cP1 != NULL) {
+  while (p2 != NULL) {//Se itera en el segundo polinomio
+    while (cP1 != NULL) {//Se le multiplica cada término del segundo polinomio al primer polinomio
       push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
-           (cP1->grd) + (p2->grd));
+           (cP1->grd) + (p2->grd));//Se ingresa a una pila nueva
       cP1 = cP1->next;
     }
-    p2 = p2->next;
+    p2 = p2->next;//Se avanza
     cP1 = p1;
   }
   return rMult;
@@ -245,8 +254,8 @@ node *multiplicarConstXPolin(long Cons, node *pol) {//Multiplica una constante p
   node *cP = NULL;
   node *rMult = NULL;
   cP = pol;
-  while (cP) {
-    push(&rMult, (long)(cP->coef) * Cons, (long) (cP->grd));
+  while (cP) {//Se itera por el polinomio
+    push(&rMult, (long)(cP->coef) * Cons, (long) (cP->grd));//Se multiplica el coeficiente por la constante y se guarda en una pila nueva
     cP = cP->next;
   }
   return rMult;
@@ -257,7 +266,7 @@ node *multiplicarPolinomioRyConc(node *p1, node *p2) {//Reducir y conquitar a(x)
   node *aux = NULL;
   aux =  multiplicarConstXPolin(p1->coef,p2);//Guardo el primer término de la suma (a(n-1)x b(x))X(n-1) 
   rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));//Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
-  return sumagrdIguales(rMult);
+  return rMult;
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -363,11 +372,11 @@ void menu(node *head1, node *head2) {
       printf("\nx  "
              "-----------------------------------------------------------------"
              "-----\n\n");
-      aux = multiplicarPolinomioRyConc(head1, head2);
+      aux = multiplicarPolinomioFBrut(head1, head2);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
-      aux = sumagrdIguales(aux);
       display(&aux);
+      aux = eliminar(aux);
       break;
     case 5:
       break;
@@ -386,6 +395,7 @@ void menu(node *head1, node *head2) {
 int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
+  
   node *head2 = NULL;
   node *P = NULL;
   long exp = 0;
