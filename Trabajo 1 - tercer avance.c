@@ -29,6 +29,7 @@ void push(node **head, long coef, long grd) {
     nNode->next = *head; // Apuntar a head
     *head = nNode;       // Igualaron head al nodo temporal.
   } else {
+    
     aux = (*head);
     while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
       aux = aux->next;
@@ -197,21 +198,8 @@ node *restaPolinomios(node *p1, node *p2) {
   }
   return pFinal;
 }
-node *multiplicarPolinomio(node *p1, node *p2) {
-  node *cP1 = NULL;
-  node *rMult = NULL;
-  cP1 = p1;
-  while (p2 != NULL) {
-    while (cP1 != NULL) {
-      push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
-           (cP1->grd) + (p2->grd));
-      cP1 = cP1->next;
-    }
-    p2 = p2->next;
-    cP1 = p1;
-  }
-  return rMult;
-}
+
+
 node *sumagrdIguales(node *p) {
   long n = 0;
   node *final = NULL;
@@ -230,6 +218,42 @@ node *sumagrdIguales(node *p) {
   }
   push(&final, p->coef, p->grd);
   return final;
+}
+
+
+node *multiplicarPolinomioFBrut(node *p1, node *p2) {
+  node *cP1 = NULL;
+  node *rMult = NULL;
+  cP1 = p1;
+  while (p2 != NULL) {
+    while (cP1 != NULL) {
+      push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
+           (cP1->grd) + (p2->grd));
+      cP1 = cP1->next;
+    }
+    p2 = p2->next;
+    cP1 = p1;
+  }
+  return rMult;
+}
+
+node *multiplicarConstXPolin(long Cons, node *pol) {
+  node *cP = NULL;
+  node *rMult = NULL;
+  cP = pol;
+  while (cP) {
+    push(&rMult, (long)(cP->coef) * Cons, (long) (cP->grd));
+    cP = cP->next;
+  }
+  return rMult;
+}
+
+node *multiplicarPolinomioRyConc(node *p1, node *p2) {
+  node *rMult = NULL;
+  node *aux = NULL;
+  push(&aux, (long) (p1->coef) * (long) (p2->coef), (long) (p1->grd) + (long) (p2->grd));
+  rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));
+  return sumagrdIguales(rMult);
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -335,7 +359,7 @@ void menu(node *head1, node *head2) {
       printf("\nx  "
              "-----------------------------------------------------------------"
              "-----\n\n");
-      aux = multiplicarPolinomio(head1, head2);
+      aux = multiplicarPolinomioRyConc(head1, head2);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
       aux = sumagrdIguales(aux);
