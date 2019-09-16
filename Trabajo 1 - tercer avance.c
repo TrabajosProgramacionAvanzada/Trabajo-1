@@ -211,28 +211,6 @@ node *restaPolinomios(node *p1, node *p2) {
 }
 
 
-node *sumagrdIguales(node *p) {
-  long n = 0;
-  node *final = NULL;
-  while (p->next != NULL) {
-    if (p->grd == p->next->grd) {
-      n = n + (p->coef + p->next->coef);
-    } else {
-      if (n > 0) {
-        push(&final, n, p->grd);
-        n = 0;
-      } else {
-        push(&final, p->coef, p->grd);
-      }
-    }
-    p = p->next;
-  }
-  push(&final, p->coef, p->grd);
-  return final;
-  }
-
-
-
 node *multiplicarPolinomioFBrut(node *p1, node *p2) {//Función a fuerza bruta
   node *cP1 = NULL;
   node *rMult = NULL;
@@ -264,8 +242,27 @@ node *multiplicarConstXPolin(long Cons, node *pol) {//Multiplica una constante p
 node *multiplicarPolinomioRyConc(node *p1, node *p2) {//Reducir y conquitar a(x) = a(n-1)X^(n-1) + A(x) b(x) = b(n-1)X^(n-1) + B(x)
   node *rMult = NULL;
   node *aux = NULL;
-  aux =  multiplicarConstXPolin(p1->coef,p2);//Guardo el primer término de la suma (a(n-1)x b(x))X(n-1) 
-  rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));//Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
+  node *aux1 = NULL;
+  node *aux2 = NULL;
+  push(&aux2,1,0);
+  push(&aux1,0,0);
+  aux =  multiplicarConstXPolin(p1->coef,p2);//Guardo el primer término de la suma (a(n-1)x b(x))X(n-1)
+  display(&aux);
+  if(p1->next && p2->next){
+    rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));//Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
+  }
+  else{
+    if (p1->next){
+      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef),aux2 ) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next, aux2));
+    }else{
+      if (p2->next){
+      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), aux2) )), multiplicarPolinomioRyConc(aux2, p2->next));	
+      }
+      else{
+      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), aux2) ,multiplicarConstXPolin((long) (p2->coef), aux2) )), aux1);	
+      }
+    }
+  }
   return rMult;
 }
 
@@ -372,7 +369,7 @@ void menu(node *head1, node *head2) {
       printf("\nx  "
              "-----------------------------------------------------------------"
              "-----\n\n");
-      aux = multiplicarPolinomioFBrut(head1, head2);
+      aux = multiplicarPolinomioRyConc(head1, head2);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
       display(&aux);
@@ -395,9 +392,14 @@ void menu(node *head1, node *head2) {
 int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
-  
   node *head2 = NULL;
   node *P = NULL;
+  push(&head1, 1,2);
+  push(&head1, 1,1);
+  push(&head2, 1,2);
+  push(&head2, 1,1);
+  P = multiplicarPolinomioRyConc(head1, head2);
+       display(&P);
   menu(head1, head2);
   return 0;
 }
