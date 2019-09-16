@@ -53,31 +53,29 @@ void display(node **head) {
   /*
     Funcion que muestra el polinomio
   */
-  node *temp;                   // Crear nodo temporal
-  temp = *head;                 // Igualar el nodo temporal a nuestra head
-  if (temp && temp->coef > 0) { // Si el coeficiente es mayor que cero
-    printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
-    temp = temp->next;
-  } else if (temp && temp->coef < 0) { // Sino
-    printf("- %ld x^%ld ", temp->coef * -1,
-           temp->grd); // Imprime con un signo menos.
-    temp = temp->next;
-  }
-  // Mostramos el primer elemento antes del bucle para evitar el signo positivo
-  // de haber
-  while (temp != NULL) {  // Mientras el nodo temporal sea distinto de NULL
+  node *temp;            // Crear nodo temporal
+  temp = *head;          // Igualar el nodo temporal a nuestra head
+  if (temp->coef > 0) { // Si el coeficiente es mayor que cero
+      printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
+    } else if (temp->coef < 0) {                    // Sino
+      printf("- %ld x^%ld ", temp->coef * -1,
+             temp->grd); // Imprime con un signo menos.
+    }
+  temp = temp->next;
+  //Mostramos el primer elemento antes del bucle para evitar el signo positivo de haber
+  while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0) { // Si el coeficiente es mayor que cero
-      if (temp->grd == 0) {
-        printf("+ %ld ", temp->coef);
-        temp = temp->next; // Mover al siguiente nodo en la lista.
-        continue;
+      if(temp->grd == 0){
+	printf("+ %ld ", temp->coef);
+	temp = temp->next; // Mover al siguiente nodo en la lista.
+	continue;
       }
       printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
     } else {
-      if (temp->grd == 0) {
-        printf("- %ld ", temp->coef * -1);
-        temp = temp->next; // Mover al siguiente nodo en la lista.
-        continue;
+       if(temp->grd == 0){
+	printf("- %ld ", temp->coef * -1);
+	temp = temp->next; // Mover al siguiente nodo en la lista.
+	continue;
       }
       printf("- %ld x^%ld ", temp->coef * -1, temp->grd);
     }
@@ -279,8 +277,7 @@ void menu(node *head1, node *head2) {
   do {
 
     printf("\n1. sumar dos polinomios generados \n2. restar dos polinomios "
-           "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos "
-           "polinomios generados  \n5. opcion sair\n");
+           "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos polinomios generados  \n5. opcion sair\n");
     scanf("%d", &opcion); // Se guarda la opciÃ³n ingresada
     switch (opcion) {
     case 1:
