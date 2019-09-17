@@ -50,7 +50,7 @@ void push(node **head, long coef, long grd) {
   }
 }
 
-// Funcion copiagith
+// Funcion copia de polinomios
 node *copy(node *P1) {
   node *copia = NULL;
   while (P1 != NULL) {
@@ -243,23 +243,26 @@ node *multiplicarPolinomioRyConc(node *p1, node *p2) {//Reducir y conquitar a(x)
   node *rMult = NULL;
   node *aux = NULL;
   node *aux1 = NULL;
-  node *aux2 = NULL;
-  push(&aux2,1,0);//Neutro multiplicativo
-  push(&aux1,0,0);//Neutro aditivo
-  aux =  multiplicarConstXPolin(p1->coef,p2);//Guardo el primer término de la suma (a(n-1)x b(x))X(n-1)
-  display(&aux);
+  node *aux2 = NULL;                            //(aX^n + A(x)) * (bX^n + B(x)) = abX^2n + aB(x) + bA(x) + A(x)B(x)
+  node *a = NULL;
+  node *b = NULL;
+  node *Ax = NULL;
+  node *Bx = NULL;
+  push(&a, p1->coef, p1->grd);
+  push(&b, p2->coef, p2->grd);
+  push(&aux, ((long)(p1->coef) * (long)(p2->coef)), ((long)(p1->grd)*(long)(p2->grd))); //abX^2n(n*m)
   if(p1->next && p2->next){
-    rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next,p2->next));//Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
+    rMult = sumarPolinomios(sumarPolinomios(sumarPolinomios(aux, multiplicarConstXPolin((long)(p1->coef), p2->next)),  multiplicarConstXPolin((long)(p2->coef) , p1->next)), multiplicarPolinomioRyConc(p1->next, p2->next)); //Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
   }
   else{
     if (p1->next){//Se remplaza a p2->next por aux2 (1X^0)
-      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef),aux2 ) ,multiplicarConstXPolin((long) (p2->coef), p1->next) )), multiplicarPolinomioRyConc(p1->next, aux2));
+      rMult = sumarPolinomios(aux, multiplicarConstXPolin(((long) (p2->coef)), p1->next));
     }else{
       if (p2->next){//Se remplaza a p->next por aux2 (1X^0)
-      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), p2->next) ,multiplicarConstXPolin((long) (p2->coef), aux2) )), multiplicarPolinomioRyConc(aux2, p2->next));	
+	rMult = sumarPolinomios(aux, multiplicarConstXPolin(((long) (p1->coef)), p2->next));
       }
       else{//Se remplaza a p1->next y p2->next por aux2 (1X^0) y se corta la recursión reemplazando la llamada en la suma con aux1 (0X^0) CASO BASE!!!
-      rMult = sumarPolinomios(sumarPolinomios(aux, sumarPolinomios(multiplicarConstXPolin((long) (p1->coef), aux2) ,multiplicarConstXPolin((long) (p2->coef), aux2) )), aux1);	
+      rMult = aux;
       }
     }
   }
@@ -399,6 +402,9 @@ int main() {
   push(&head2, 1,2);
   push(&head2, 1,1);
   P = multiplicarPolinomioRyConc(head1, head2);
+       display(&P);
+       P = eliminar(P);
+  P = multiplicarPolinomioFBrut(head1, head2);
        display(&P);
   menu(head1, head2);
   return 0;
