@@ -454,7 +454,7 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) {//FunciÛn a fuerza bruta
 
 }
 
-
+/*
 
 node *multiplirecuIndiv(long Cons, node *pol) {//Multiplica una constante por un polinomio
 
@@ -475,32 +475,37 @@ node *multiplirecuIndiv(long Cons, node *pol) {//Multiplica una constante por un
   return rMult2;
 
 }
+*/
 
 
+//funcion que multiplica valores
 
 node *multiplicarPolinomioRyCon(node *p1, node *p2) {
-    node *rMult = NULL;
-    multirecursion(rMult,p1,p2);
-    return rMult;
+    node *rMult = NULL; ///nodo para la acumulacion
+    node *Result = NULL;  ///nodo a iterar
+    Result=multiplicarPolinomioRyCon1(rMult,p1,p2);
+    return Result;
 
 }
-
 //funcion recrsiva que hace que avance en los polinomios, casos base, que p1 o p2 sean null
 
-node *multirecursion(node *rMult, node *p1, node *p2){
+node *multiplicarPolinomioRyCon1(node *rMult, node *p1, node *p2){
     if(p1==NULL){
-        multiplicarPolinomioRyCon(rMult, push(rMult,(long)(p2->coef),(long)(p2->grd)), p2->next);
-        return rMult;
-  }
+        multiplicarPolinomioRyCon1(push(&rMult,(long)(p2->coef),(long)(p2->grd)),p1->next, p2->next);
+
+    }
 
    if(p2==NULL){
-        multiplicarPolinomioRyCon(rMult, push(rMult,(long)(p1->coef),(long)(p1->grd)), p1->next);
-        return rMult;
-  }
+        multiplicarPolinomioRyCon1(push(&rMult,(long)(p1->coef),(long)(p1->grd)), p1->next, p2->next);
+
+    }
 
   else{
-       sumarPolinomios(puch(rMult,(long)(p1->coef)*(long)(p2->coef),(long)(p1->grd)+(long)(p2->grd)),push(suma(multiplirecuIndiv( p1->coef,p2->next),multiplirecuIndiv(p2->coef,p1->next))))
-  }
+       push(&rMult,(long)(p1->coef)*(long)(p2->coef),(long)(p1->grd)+(long)(p2->grd));
+       multiplicarPolinomioRyCon1(rMult,p1->next,p2->next);
+
+    }
+  return rMult;
 }
 // Funci√≥n que elimina de la memoria la lista que contiene al polinomio
 
@@ -766,7 +771,7 @@ int main() {
 
   push(&head2, 1,1);
 
-  P = multiplicarPolinomioRyConc(head1, head2);
+  P = multiplicarPolinomioRyCon(head1, head2);
 
   display(&P);
 
