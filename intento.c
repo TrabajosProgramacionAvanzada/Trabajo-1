@@ -454,59 +454,34 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) {//FunciÛn a fuerza bruta
 
 }
 
-/*
 
-node *multiplirecuIndiv(long Cons, node *pol) {//Multiplica una constante por un polinomio
-
-  node *cP = NULL;
-
-  node *rMult2 = NULL;
-
-  cP = pol;
-
-  while (cP) {//Se itera por el polinomio
-
-    push(&rMult2, (long)(cP->coef) * Cons, (long) (cP->grd));//Se multiplica el coeficiente por la constante y se guarda en una pila nueva
-
-    cP = cP->next;
-
-  }
-
-  return rMult2;
-
-}
-*/
-
-
-//funcion que multiplica valores
-
-node *multiplicarPolinomioRyCon(node *p1, node *p2) {
-    node *rMult = NULL; ///nodo para la acumulacion
-    node *Result = NULL;  ///nodo a iterar
-    Result=multiplicarPolinomioRyCon1(rMult,p1,p2);
-    return Result;
-
-}
 //funcion recrsiva que hace que avance en los polinomios, casos base, que p1 o p2 sean null
 
-node *multiplicarPolinomioRyCon1(node *rMult, node *p1, node *p2){
-    if(p1==NULL){
-        multiplicarPolinomioRyCon1(push(&rMult,(long)(p2->coef),(long)(p2->grd)),p1->next, p2->next);
-
-    }
-
-   if(p2==NULL){
-        multiplicarPolinomioRyCon1(push(&rMult,(long)(p1->coef),(long)(p1->grd)), p1->next, p2->next);
-
-    }
-
-  else{
+node * multiplicarPolinomioRyCon1(node *rMult, node *p1, node *p2){
+  node *auxA = NULL;
+  node *auxB = NULL;
+  node *aux = NULL;
+  push(&auxA, (long) (p1->coef), (long) (p1->grd));
+  push(&auxB, (long) (p2->coef), (long) (p2->grd));
+   if (p1 &&  p2){
        push(&rMult,(long)(p1->coef)*(long)(p2->coef),(long)(p1->grd)+(long)(p2->grd));
-       multiplicarPolinomioRyCon1(rMult,p1->next,p2->next);
+       rMult = sumarPolinomios(rMult, multiplicarPolinomioFBrut(auxA, p2->next));
+       rMult = sumarPolinomios(rMult, multiplicarPolinomioFBrut(auxB, p1->next));
+       display(&rMult);
+       if(p1->next && p2->next){
+	 multiplicarPolinomioRyCon1(rMult,p1->next,p2->next);
+       } else{
+	 return rMult;
+       }
+   }
+}
 
-    }
+node *multiplicarPolinomioRyCon(node *p1, node *p2){
+  node *rMult = NULL; ///nodo para la acumulacion
+  rMult =  multiplicarPolinomioRyCon1(rMult,p1,p2);
   return rMult;
 }
+
 // Funci√≥n que elimina de la memoria la lista que contiene al polinomio
 
 node *eliminar(node *head) {
@@ -713,7 +688,7 @@ void menu(node *head1, node *head2) {
 
              "-----\n\n");
 
-      aux = multiplicarPolinomioRyConc(head1, head2);
+      aux = multiplicarPolinomioRyCon(head1, head2);
 
       head1 = eliminar(head1);
 
@@ -773,9 +748,15 @@ int main() {
 
   P = multiplicarPolinomioRyCon(head1, head2);
 
+   display(&P);
+
+  P = eliminar(P);
+  
+  P = multiplicarPolinomioFBrut(head1, head2);
+
   display(&P);
 
   menu(head1, head2);
 
   return 0;
-  }
+}
