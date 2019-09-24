@@ -20,33 +20,29 @@ void push(node **head, long coef, long grd) {
   /*
     Inserta el elemento al inicio de la linkedList.
   */
-  node *aux;
+  node *aux = NULL;
   node *aux1 = NULL;
-  node *nNode = malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
+  node *nNode = NULL;
+  nNode = (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;                 // Asignar coef a coef
   nNode->grd = grd;                   // Asignar el grado
-
   if (*head == NULL || (*head)->grd < grd) {
     nNode->next = *head; // Apuntar a head
-    *head = nNode;       // Igualaron head al nodo temporal.
+    *head = nNode;       // Igualaron head al nodo temporal
   } else {
     aux = (*head);
-    if ((long)aux->grd == grd){
-      aux->coef = aux->coef + coef;
-      free(nNode);
-      return;
-    }
     while (aux != NULL && (long)aux->grd > grd) {
       aux1 = aux;
       aux = aux->next;
     }
-    if (aux != NULL && (long)aux->grd == grd){
+    if (aux != NULL && (long)aux->grd == grd) {
       aux->coef = aux->coef + coef;
       free(nNode);
       return;
     }
     nNode->next = aux1->next;
     aux1->next = nNode;
+    free(aux);
   }
 }
 
@@ -64,29 +60,30 @@ void display(node **head) {
   /*
     Funcion que muestra el polinomio
   */
-  node *temp;            // Crear nodo temporal
-  temp = *head;          // Igualar el nodo temporal a nuestra head
+  node *temp;           // Crear nodo temporal
+  temp = *head;         // Igualar el nodo temporal a nuestra head
   if (temp->coef > 0) { // Si el coeficiente es mayor que cero
-      printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
-    } else if (temp->coef < 0) {                    // Sino
-      printf("- %ld x^%ld ", temp->coef * -1,
-             temp->grd); // Imprime con un signo menos.
-    }
+    printf("%ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas.
+  } else if (temp->coef < 0) {                   // Sino
+    printf("- %ld x^%ld ", temp->coef * -1,
+           temp->grd); // Imprime con un signo menos.
+  }
   temp = temp->next;
-  //Mostramos el primer elemento antes del bucle para evitar el signo positivo de haber
-  while (temp != NULL) { // Mientras el nodo temporal sea distinto de NULL
+  // Mostramos el primer elemento antes del bucle para evitar el signo positivo
+  // de haber
+  while (temp != NULL) {  // Mientras el nodo temporal sea distinto de NULL
     if (temp->coef > 0) { // Si el coeficiente es mayor que cero
-      if(temp->grd == 0){
-	printf("+ %ld ", temp->coef);
-	temp = temp->next; // Mover al siguiente nodo en la lista.
-	continue;
+      if (temp->grd == 0) {
+        printf("+ %ld ", temp->coef);
+        temp = temp->next; // Mover al siguiente nodo en la lista.
+        continue;
       }
       printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
     } else {
-       if(temp->grd == 0){
-	printf("- %ld ", temp->coef * -1);
-	temp = temp->next; // Mover al siguiente nodo en la lista.
-	continue;
+      if (temp->grd == 0) {
+        printf("- %ld ", temp->coef * -1);
+        temp = temp->next; // Mover al siguiente nodo en la lista.
+        continue;
       }
       printf("- %ld x^%ld ", temp->coef * -1, temp->grd);
     }
@@ -210,59 +207,62 @@ node *restaPolinomios(node *p1, node *p2) {
   return pFinal;
 }
 
-
-node *multiplicarPolinomioFBrut(node *p1, node *p2) {//Función a fuerza bruta
+node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   node *cP1 = NULL;
   node *rMult = NULL;
   cP1 = p1;
-  while (p2 != NULL) {//Se itera en el segundo polinomio
-    while (cP1 != NULL) {//Se le multiplica cada término del segundo polinomio al primer polinomio
+  while (p2 != NULL) {    // Se itera en el segundo polinomio
+    while (cP1 != NULL) { // Se le multiplica cada término del segundo polinomio
+                          // al primer polinomio
       push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
-           (cP1->grd) + (p2->grd));//Se ingresa a una pila nueva
+           (cP1->grd) + (p2->grd)); // Se ingresa a una pila nueva
       cP1 = cP1->next;
     }
-    p2 = p2->next;//Se avanza
+    p2 = p2->next; // Se avanza
     cP1 = p1;
   }
   return rMult;
-  
 }
 
-node *multiplicarConstXPolin(long Cons, node *pol) {//Multiplica una constante por un polinomio
-  node *cP = NULL;
-  node *rMult = NULL;
-  cP = pol;
-  while (cP) {//Se itera por el polinomio
-    push(&rMult, (long)(cP->coef) * Cons, (long) (cP->grd));//Se multiplica el coeficiente por la constante y se guarda en una pila nueva
-    cP = cP->next;
-  }
-  return rMult;
-}
 
-node *multiplicarPolinomioRyConc(node *p1, node *p2) {//Reducir y conquitar a(x) = a(n-1)X^(n-1) + A(x) b(x) = b(n-1)X^(n-1) + B(x)
+
+node *multiplicarPolinomioRyConc(
+    node *p1, node *p2) { // Reducir y conquistar a(x) = a(n-1)X^(n-1) + A(x)
+                          // b(x) = b(n-1)X^(n-1) + B(x)
   node *rMult = NULL;
-  node *aux = NULL;
+  node *aux = NULL; //a*b
   node *aux1 = NULL;
-  node *aux2 = NULL;                            //(aX^n + A(x)) * (bX^n + B(x)) = abX^2n + aB(x) + bA(x) + A(x)B(x)
-  node *a = NULL;
-  node *b = NULL;
-  node *Ax = NULL;
-  node *Bx = NULL;
+  node *aux2 =
+      NULL; //(aX^n + A(x)) * (bX^n + B(x)) = abX^2n + aB(x) + bA(x) + A(x)B(x)
+  node *a = NULL; //aX^n
+  node *b = NULL;//bX^n
   push(&a, p1->coef, p1->grd);
   push(&b, p2->coef, p2->grd);
-  push(&aux, ((long)(p1->coef) * (long)(p2->coef)), ((long)(p1->grd)*(long)(p2->grd))); //abX^2n(n*m)
-  if(p1->next && p2->next){
-    rMult = sumarPolinomios(sumarPolinomios(sumarPolinomios(aux, multiplicarConstXPolin((long)(p1->coef), p2->next)),  multiplicarConstXPolin((long)(p2->coef) , p1->next)), multiplicarPolinomioRyConc(p1->next, p2->next)); //Sé que está desordenado pero es la searación en cuatro sumas, la anterior expuesta en aux, (an-1 . B(x) + bn-1 . A(x))xn-1) y la multiplicación restante (A(x) . B(x))
-  }
-  else{
-    if (p1->next){//Se remplaza a p2->next por aux2 (1X^0)
-      rMult = sumarPolinomios(aux, multiplicarConstXPolin(((long) (p2->coef)), p1->next));
-    }else{
-      if (p2->next){//Se remplaza a p->next por aux2 (1X^0)
-	rMult = sumarPolinomios(aux, multiplicarConstXPolin(((long) (p1->coef)), p2->next));
-      }
-      else{//Se remplaza a p1->next y p2->next por aux2 (1X^0) y se corta la recursión reemplazando la llamada en la suma con aux1 (0X^0) CASO BASE!!!
-      rMult = aux;
+  aux = multiplicarPolinomioFBrut(a, b);
+  if (p1->next && p2->next) {
+    aux1 = multiplicarPolinomioFBrut(a, p2->next);
+    aux2 = multiplicarPolinomioFBrut(b, p1->next);
+    rMult = sumarPolinomios(
+        sumarPolinomios(sumarPolinomios(aux, aux1),
+                       aux2),
+        multiplicarPolinomioRyConc(
+            p1->next,
+            p2->next)); // Sé que está desordenado pero es la searación en
+                        // cuatro sumas, la anterior expuesta en aux, (an-1 .
+                        // B(x) + bn-1 . A(x))xn-1) y la multiplicación restante
+                        // (A(x) . B(x))
+  } else {
+    if (p1->next) { // Se remplaza a p2->next por aux2 (1X^0)
+      rMult = sumarPolinomios(
+          aux, multiplicarPolinomioFBrut(aux2, p1->next));
+    } else {
+      if (p2->next) { // Se remplaza a p->next por aux2 (1X^0)
+        rMult = sumarPolinomios(
+				aux, multiplicarPolinomioFBrut(aux1, p2->next));
+      } else { // Se remplaza a p1->next y p2->next por aux2 (1X^0) y se corta
+               // la recursión reemplazando la llamada en la suma con aux1 (0X^0)
+               // CASO BASE!!!
+        rMult = aux;
       }
     }
   }
@@ -290,7 +290,8 @@ void menu(node *head1, node *head2) {
   do {
 
     printf("\n1. sumar dos polinomios generados \n2. restar dos polinomios "
-           "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos polinomios generados  \n5. opcion sair\n");
+           "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos "
+           "polinomios generados  \n5. opcion sair\n");
     scanf("%d", &opcion); // Se guarda la opción ingresada
     switch (opcion) {
     case 1:
@@ -397,15 +398,18 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  push(&head1, 1,2);
-  push(&head1, 1,1);
-  push(&head2, 1,2);
-  push(&head2, 1,1);
-  P = multiplicarPolinomioRyConc(head1, head2);
-       display(&P);
-       P = eliminar(P);
+  push(&head1, 1, 2);
+  push(&head1, 1, 1);
+  display(&head1);
+  push(&head2, 1, 2);
+  push(&head2, 1, 1);
+  display(&head2);
+  //P = multiplicarPolinomioRyConc(head1, head2);
+  //display(&P);
+  //P = eliminar(P);
   P = multiplicarPolinomioFBrut(head1, head2);
-       display(&P);
-  menu(head1, head2);
+  display(&P);
+  P = eliminar(P);
+  //menu(head1, head2);
   return 0;
 }
