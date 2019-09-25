@@ -39,6 +39,20 @@ void push(node **head, long coef, long grd) {
   }
 }
 
+
+// FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
+node *eliminar(node *head) {
+  node *copia = NULL;
+  copia = head; // Se copia para mantener el puntero del prÃ³ximo nodo
+  while (head) {
+    copia = copia->next; // Se copia el siguiente
+    free(head);          // Se libera memoria
+    head = copia;        // Se pasa al siguiente nodo
+  }
+  return head; // Debe retornar NULL
+}
+
+
 // Funcion copia de polinomios
 node *copy(node *P1) {
   node *copia = NULL;
@@ -167,6 +181,8 @@ node *sumarPolinomios(node *p1, node *p2) {
       p2 = p2->next;
     }
   }
+  p1 = eliminar(p1);
+  p2 = eliminar(p2);
   return pFinal;
 }
 // Funcion que resta dos polinomios
@@ -197,6 +213,8 @@ node *restaPolinomios(node *p1, node *p2) {
       p2 = p2->next;
     }
   }
+  p1 = eliminar(p1);
+  p2 = eliminar(p2);
   return pFinal;
 }
 node *sumagrdIguales(node *p) {
@@ -216,6 +234,7 @@ node *sumagrdIguales(node *p) {
     p = p->next;
   }
   push(&final, p->coef, p->grd);
+  p = eliminar(p);
   return final;
 }
 
@@ -233,7 +252,6 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
     p2 = p2->next; // Se avanza
     cP1 = p1;
   }
-
   return sumagrdIguales(rMult);
 }
 
@@ -274,19 +292,12 @@ node *multiplicarPolinomioRyConc(
       }
     }
   }
+  a = eliminar(a);
+  b = eliminar(b);
+  aux = eliminar(aux);
+  aux1 = eliminar(aux1);
+  aux2 = eliminar(aux2);
   return sumagrdIguales(rMult);
-}
-
-// FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
-node *eliminar(node *head) {
-  node *copia = NULL;
-  copia = head; // Se copia para mantener el puntero del prÃ³ximo nodo
-  while (head) {
-    copia = copia->next; // Se copia el siguiente
-    free(head);          // Se libera memoria
-    head = copia;        // Se pasa al siguiente nodo
-  }
-  return head; // Debe retornar NULL
 }
 
 // FunciÃ³n que despliega un menÃº para el usuario
@@ -315,16 +326,15 @@ void menu(node *head1, node *head2) {
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
-      printf("\nEl primer polinomio generado:\n\n");
+      /*     printf("\nEl primer polinomio generado:\n\n");
       display(&head1);
       printf("\nEl segundo polinomio generado:\n\n");
       display(&head2);
       printf("\n+--------------------------------------------------------------"
              "--------\n\n");
-      aux = sumarPolinomios(head1, head2);
+*/      aux = sumarPolinomios(head1, head2);
       head2 = eliminar(head2);
-      head2 = copy(aux);
-      display(&head2);
+      display(&aux);
       break;
     case 2:
       printf("\nIngrese el grado maximo del primer polinomio: ");
@@ -338,17 +348,16 @@ void menu(node *head1, node *head2) {
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
-      printf("\nEl primer polinomio generado:\n\n");
+      /*      printf("\nEl primer polinomio generado:\n\n");
       display(&head1);
       printf("\nEl segundo polinomio generado:\n\n");
       display(&head2);
       printf("\n-  "
              "-----------------------------------------------------------------"
-             "-----\n\n");
+             "-----\n\n");*/
       aux = restaPolinomios(head1, head2);
       head2 = eliminar(head2);
-      head2 = copy(aux);
-      display(&head2);
+      display(&aux);
       break;
     case 3:
       printf("\nIngrese el grado maximo del polinomio: ");
@@ -358,8 +367,8 @@ void menu(node *head1, node *head2) {
       aux = eliminar(aux);
       head1 = ingresar_plinomio(grdo1); // Pide el polinomio al usuario
       head2 = copy(head1);
-      printf("\nEl polinomio ingresado:\n");
-      display(&head1);
+      //printf("\nEl polinomio ingresado:\n");
+      //display(&head1);
       printf("\nEl polinomio copiado:\n");
       display(&head2);
       break;
@@ -431,19 +440,19 @@ int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
-  node *P = NULL;
-  head1 = generator(1000);
+  /*node *P = NULL;
+  head1 = generator(300);
   //display(&head1);
-  head2 = generator(1000);
+  head2 = generator(300);
   //display(&head2);
-  //   P = multiplicarPolinomioRyConc(head1, head2);
-   // display(&P);
+  //P = multiplicarPolinomioRyConc(head1, head2);
+  // display(&P);
   // P = eliminar(P);
   P = multiplicarPolinomioFBrut(head1, head2);
-   head1 = eliminar(head1);
-   head2 = eliminar(head2);
-   display(&P);
+  head1 = eliminar(head1);
+  head2 = eliminar(head2);
+  display(&P);
   P = eliminar(P);
-  // menu(head1, head2);
+  //*/ menu(head1, head2);
   return 0;
 }
