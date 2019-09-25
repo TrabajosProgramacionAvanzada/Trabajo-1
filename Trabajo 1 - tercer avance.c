@@ -20,29 +20,22 @@ void push(node **head, long coef, long grd) {
   /*
     Inserta el elemento al inicio de la linkedList.
   */
-  node *aux = NULL;
-  node *aux1 = NULL;
-  node *nNode = NULL;
-  nNode = (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
-  nNode->coef = coef;                 // Asignar coef a coef
-  nNode->grd = grd;                   // Asignar el grado
+  node *aux;
+  node *nNode =
+      (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
+  nNode->coef = coef;               // Asignar coef a coef
+  nNode->grd = grd;                 // Asignar el grado
+
   if (*head == NULL || (*head)->grd < grd) {
     nNode->next = *head; // Apuntar a head
-    *head = nNode;       // Igualaron head al nodo temporal
+    *head = nNode;       // Igualaron head al nodo temporal.
   } else {
     aux = (*head);
-    while (aux != NULL && (long)aux->grd > grd) {
-      aux1 = aux;
+    while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
       aux = aux->next;
     }
-    if (aux != NULL && (long)aux->grd == grd) {
-      aux->coef = aux->coef + coef;
-      free(nNode);
-      return;
-    }
-    nNode->next = aux1->next;
-    aux1->next = nNode;
-    free(aux);
+    nNode->next = aux->next;
+    aux->next = nNode;
   }
 }
 
@@ -206,6 +199,25 @@ node *restaPolinomios(node *p1, node *p2) {
   }
   return pFinal;
 }
+node *sumagrdIguales(node *p) {
+  long n = 0;
+  node *final = NULL;
+  while (p->next != NULL) {
+    if (p->grd == p->next->grd) {
+      n = n + (p->coef + p->next->coef);
+    } else {
+      if (n > 0) {
+        push(&final, n, p->grd);
+        n = 0;
+      } else {
+        push(&final, p->coef, p->grd);
+      }
+    }
+    p = p->next;
+  }
+  push(&final, p->coef, p->grd);
+  return final;
+}
 
 node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   node *cP1 = NULL;
@@ -221,21 +233,20 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
     p2 = p2->next; // Se avanza
     cP1 = p1;
   }
-  return rMult;
+
+  return sumagrdIguales(rMult);
 }
-
-
 
 node *multiplicarPolinomioRyConc(
     node *p1, node *p2) { // Reducir y conquistar a(x) = a(n-1)X^(n-1) + A(x)
                           // b(x) = b(n-1)X^(n-1) + B(x)
   node *rMult = NULL;
-  node *aux = NULL; //a*b
+  node *aux = NULL; // a*b
   node *aux1 = NULL;
   node *aux2 =
       NULL; //(aX^n + A(x)) * (bX^n + B(x)) = abX^2n + aB(x) + bA(x) + A(x)B(x)
-  node *a = NULL; //aX^n
-  node *b = NULL;//bX^n
+  node *a = NULL; // aX^n
+  node *b = NULL; // bX^n
   push(&a, p1->coef, p1->grd);
   push(&b, p2->coef, p2->grd);
   aux = multiplicarPolinomioFBrut(a, b);
@@ -243,8 +254,7 @@ node *multiplicarPolinomioRyConc(
     aux1 = multiplicarPolinomioFBrut(a, p2->next);
     aux2 = multiplicarPolinomioFBrut(b, p1->next);
     rMult = sumarPolinomios(
-        sumarPolinomios(sumarPolinomios(aux, aux1),
-                       aux2),
+        sumarPolinomios(sumarPolinomios(aux, aux1), aux2),
         multiplicarPolinomioRyConc(
             p1->next,
             p2->next)); // Sé que está desordenado pero es la searación en
@@ -253,20 +263,18 @@ node *multiplicarPolinomioRyConc(
                         // (A(x) . B(x))
   } else {
     if (p1->next) { // Se remplaza a p2->next por aux2 (1X^0)
-      rMult = sumarPolinomios(
-          aux, multiplicarPolinomioFBrut(aux2, p1->next));
+      rMult = sumarPolinomios(aux, multiplicarPolinomioFBrut(aux2, p1->next));
     } else {
       if (p2->next) { // Se remplaza a p->next por aux2 (1X^0)
-        rMult = sumarPolinomios(
-				aux, multiplicarPolinomioFBrut(aux1, p2->next));
+        rMult = sumarPolinomios(aux, multiplicarPolinomioFBrut(aux1, p2->next));
       } else { // Se remplaza a p1->next y p2->next por aux2 (1X^0) y se corta
-               // la recursión reemplazando la llamada en la suma con aux1 (0X^0)
-               // CASO BASE!!!
+               // la recursión reemplazando la llamada en la suma con aux1
+               // (0X^0) CASO BASE!!!
         rMult = aux;
       }
     }
   }
-  return rMult;
+  return sumagrdIguales(rMult);
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -291,7 +299,8 @@ void menu(node *head1, node *head2) {
 
     printf("\n1. sumar dos polinomios generados \n2. restar dos polinomios "
            "generados \n3. copiar un polinomio ingresado\n4. multiplicar dos "
-           "polinomios generados  \n5. opcion sair\n");
+           "polinomios generados reducir y conquistar  \n5. multiplicar dos "
+           "polinomios generados Fuerza Bruta \n6. Opcion salir.\n");
     scanf("%d", &opcion); // Se guarda la opción ingresada
     switch (opcion) {
     case 1:
@@ -366,13 +375,13 @@ void menu(node *head1, node *head2) {
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
-      printf("\nEl primer polinomio generado:\n\n");
-      display(&head1);
-      printf("\nEl segundo polinomio generado:\n\n");
-      display(&head2);
-      printf("\nx  "
-             "-----------------------------------------------------------------"
-             "-----\n\n");
+      // printf("\nEl primer polinomio generado:\n\n");
+      // display(&head1);
+      // printf("\nEl segundo polinomio generado:\n\n");
+      // display(&head2);
+      // printf("\nx  "
+      //     "-----------------------------------------------------------------"
+      //   "-----\n\n");
       aux = multiplicarPolinomioRyConc(head1, head2);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -380,7 +389,32 @@ void menu(node *head1, node *head2) {
       aux = eliminar(aux);
       break;
     case 5:
+      printf("\nIngrese el grado maximo del primer polinomio: ");
+      scanf("%ld", &grdo1);
+      printf("\nIngrese el grado maximo del segundo polinomio: ");
+      scanf("%ld", &grdo2);
+      aux = eliminar(aux);
+      head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
+                               // polinomio creado en la lista
+      head2 = eliminar(head2);
+      head1 = generator(
+          grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
+      head2 = generator(grdo2);
+      /*printf("\nEl primer polinomio generado:\n\n");
+      display(&head1);
+      printf("\nEl segundo polinomio generado:\n\n");
+      display(&head2);
+      printf("\nx  "
+             "-----------------------------------------------------------------"
+             "-----\n\n");
+      */
+      aux = multiplicarPolinomioFBrut(head1, head2);
+      head1 = eliminar(head1);
+      head2 = eliminar(head2);
+      display(&aux);
+      aux = eliminar(aux);
       break;
+    case 6:
       head1 = eliminar(head1); // Elimina la memoria antes de cerrar el programa
       head2 = eliminar(head2);
       aux = eliminar(aux);
@@ -390,7 +424,7 @@ void menu(node *head1, node *head2) {
       break;
     }
 
-  } while (opcion != 5);
+  } while (opcion != 6);
 }
 
 int main() {
@@ -398,18 +432,18 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  push(&head1, 1, 2);
-  push(&head1, 1, 1);
-  display(&head1);
-  push(&head2, 1, 2);
-  push(&head2, 1, 1);
-  display(&head2);
-  //P = multiplicarPolinomioRyConc(head1, head2);
-  //display(&P);
-  //P = eliminar(P);
+  head1 = generator(1000);
+  //display(&head1);
+  head2 = generator(1000);
+  //display(&head2);
+  //   P = multiplicarPolinomioRyConc(head1, head2);
+   // display(&P);
+  // P = eliminar(P);
   P = multiplicarPolinomioFBrut(head1, head2);
-  display(&P);
+   head1 = eliminar(head1);
+   head2 = eliminar(head2);
+   display(&P);
   P = eliminar(P);
-  //menu(head1, head2);
+  // menu(head1, head2);
   return 0;
 }
