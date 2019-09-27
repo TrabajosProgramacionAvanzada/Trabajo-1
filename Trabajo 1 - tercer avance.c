@@ -229,19 +229,19 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   return rMult;
 }
 
-node *multTerminoPorPolinomio(node *termino, node *head) {
+node *multTerminoPorPolinomio(long coef, long grd, node *head, node *result) {
   node *aux = head;
   while (aux != NULL) {
-    aux->coef = termino->coef * aux->coef;
-    aux->grd = termino->grd + aux->grd;
+    push(&result, coef * aux->coef, grd + aux->grd);
     aux = aux->next;
   }
-  return head;
+  return result;
 }
 
 node *multiplicarPolinomioRyConc(node *p1, node *p2) {
   node *auxm = NULL;
   node *auxM = NULL;
+  node *result = NULL;
   if (p1->grd <= p2->grd) {
     auxm = p1;
     auxM = p2;
@@ -250,10 +250,10 @@ node *multiplicarPolinomioRyConc(node *p1, node *p2) {
     auxM = p1;
   }
   while (auxm) {
-    auxM = multTerminoPorPolinomio(auxm, auxM);
+    result = multTerminoPorPolinomio(auxm->coef, auxm->grd , auxM, result);
     auxm = auxm->next;
   }
-  return auxM;
+  return result;
 }
 
 // FunciÃ³n que despliega un menÃº para el usuario
@@ -401,10 +401,11 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  P = generator(10000);
-  head1 = generator(10000);
-  display(&P);
-  P = multiplicarPolinomioRyConc(P, head1);
+  head2 = generator(10);
+  head1 = generator(10);
+  display(&head1);
+  display(&head2);
+  P = multiplicarPolinomioRyConc(head2, head1);
   display(&P);
   P = eliminar(P);
   //menu(head1, head2);
