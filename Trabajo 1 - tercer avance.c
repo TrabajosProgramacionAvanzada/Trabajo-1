@@ -27,6 +27,11 @@ void push(node **head, long coef, long grd) {
   nNode->grd = grd;                 // Asignar el grado
 
   if (*head == NULL || (*head)->grd <= grd) {
+    if (head->grd == grd) {
+      head->coef = head->coef + coef;
+      free(nNode);
+      return;
+    }
     nNode->next = *head; // Apuntar a head
     *head = nNode;       // Igualaron head al nodo temporal.
   } else {
