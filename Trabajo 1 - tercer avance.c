@@ -26,9 +26,9 @@ void push(node **head, long coef, long grd) {
   nNode->coef = coef;               // Asignar coef a coef
   nNode->grd = grd;                 // Asignar el grado
 
-  if (*head == NULL || (*head)->grd <= grd) {
-    if (*head->grd == grd) {
-      *head->coef = *head->coef + coef;
+  if ((*head) == NULL || (*head)->grd <= grd) {
+    if ((*head)->grd == grd) {
+      (*head)->coef = (*head)->coef + coef;
       free(nNode);
       return;
     }
