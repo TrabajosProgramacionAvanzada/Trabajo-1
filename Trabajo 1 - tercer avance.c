@@ -155,7 +155,7 @@ node *generator(long grado) {
   long i = 0;        // Variable que itera en el for
   long long lSup = (long long int)pow(
       2, 63); // Se define el limite superior de los coeficientes
-  for (i = 0; i <= grado;
+  for (i = 0; i < grado;
        i++) { // Iterar desde el mayor al menor. para de esta
               // manera tener la linkedlist en orden natural
     push(&head, coefGenerator(lSup),
@@ -170,7 +170,7 @@ node *ingresar_plinomio(long grds) {
   node *head = NULL;
   long coef = 0;
   long i = 0;
-  for (i = grds; i >= 0;
+  for (i = grds-1; i >= 0;
        i--) { // Se recorre desde el grado 0 al grado mÃ¡ximo dado "grds"
     scanf("%ld", &coef); // Se pide el coeficiente del polinomio
     if (coef != 0) {
@@ -184,15 +184,22 @@ node *ingresar_plinomio(long grds) {
 node *sumarPolinomios(node *p1, node *p2) {
   node *aux1 = NULL;
   node *aux2 = NULL;
+  node *aux3= NULL;
+  node *aux4= NULL;
   aux1 = p1;
   aux2 = p2;
   while (aux1 && aux2) {
     if (aux1->grd < aux2->grd) {
       if (aux1->grd > aux2->next->grd) {
-        push(&p1, aux2->coef, aux2->grd);
+	aux4=(node *)malloc(sizeof(node*));
+	aux4->coef=aux2->coef;
+	aux4->grd=aux2->grd;
+	aux3->next=aux4;
+	aux4->next=aux1;
         aux2 = aux2->next;
+	aux3=aux1;
+	aux1 = aux1->next;
       }
-      aux1 = aux1->next;
     }
     if (aux1->grd > aux2->grd) {
       aux2 = aux2->next;
@@ -426,14 +433,14 @@ int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
-  node *P = NULL;
-  head2 = generator(10);
-  head1 = generator(10);
+  /*node *P = NULL;
+  head2 = generator(1000);
+  head1 = generator(1000);
   display(&head1);
   display(&head2);
   P = multiplicarPolinomioRyConc(head2, head1);
   display(&P);
-  P = eliminar(P);
-  //menu(head1, head2);
+  P = eliminar(P);*/
+  menu(head1, head2);
   return 0;
 }
