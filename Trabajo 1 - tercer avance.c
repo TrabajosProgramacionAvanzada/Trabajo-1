@@ -31,7 +31,7 @@ void push(node **head, long coef, long grd) {
     *head = nNode;       // Igualaron head al nodo temporal.
   } else {
     aux = (*head);
-    while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
+    while (aux->next != NULL && (long)aux->next->grd >= (long)nNode->grd) {
       aux = aux->next;
     }
     if (aux->grd == grd) {
