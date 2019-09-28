@@ -21,7 +21,8 @@ void push(node **head, long coef, long grd) {
     Inserta el elemento al inicio de la linkedList.
   */
   node *aux;
-  node *nNode = (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
+  node *nNode =
+      (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;               // Asignar coef a coef
   nNode->grd = grd;                 // Asignar el grado
   if (*head == NULL || (*head)->grd < grd) {
@@ -29,7 +30,7 @@ void push(node **head, long coef, long grd) {
     *head = nNode;       // Igualaron head al nodo temporal.
   } else {
     aux = (*head);
-    if((long)aux->grd == (long)nNode->grd){
+    if ((long)aux->grd == (long)nNode->grd) {
       aux->coef = aux->coef + grd;
       free(nNode);
       return;
@@ -37,11 +38,11 @@ void push(node **head, long coef, long grd) {
     while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
       aux = aux->next;
     }
-    if(aux && (long)aux->grd == (long)nNode->grd){
+    if (aux && (long)aux->grd == (long)nNode->grd) {
       aux->coef = aux->coef + grd;
       free(nNode);
       return;
-    }else{
+    } else {
       nNode->next = aux->next;
       aux->next = nNode;
     }
@@ -124,7 +125,7 @@ node *sumagrdIguales(node *p) {
   }
   push(&final, p->coef, p->grd);
   return final;
-  }
+}
 
 long coefGenerator(long lsup) {
   /*
@@ -155,9 +156,8 @@ node *generator(long grado) {
   long i = 0;        // Variable que itera en el for
   long long lSup = (long long int)pow(
       2, 63); // Se define el limite superior de los coeficientes
-  for (i = 0; i < grado;
-       i++) { // Iterar desde el mayor al menor. para de esta
-              // manera tener la linkedlist en orden natural
+  for (i = 0; i < grado; i++) { // Iterar desde el mayor al menor. para de esta
+                                // manera tener la linkedlist en orden natural
     push(&head, coefGenerator(lSup),
          i); // Agragar el elemento iesimo a la linkedlist
   }
@@ -170,7 +170,7 @@ node *ingresar_plinomio(long grds) {
   node *head = NULL;
   long coef = 0;
   long i = 0;
-  for (i = grds-1; i >= 0;
+  for (i = grds - 1; i >= 0;
        i--) { // Se recorre desde el grado 0 al grado mÃ¡ximo dado "grds"
     scanf("%ld", &coef); // Se pide el coeficiente del polinomio
     if (coef != 0) {
@@ -184,21 +184,21 @@ node *ingresar_plinomio(long grds) {
 node *sumarPolinomios(node *p1, node *p2) {
   node *aux1 = NULL;
   node *aux2 = NULL;
-  node *aux3= NULL;
-  node *aux4= NULL;
+  node *aux3 = NULL;
+  node *aux4 = NULL;
   aux1 = p1;
   aux2 = p2;
   while (aux1 && aux2) {
     if (aux1->grd < aux2->grd) {
       if (aux1->grd > aux2->next->grd) {
-	aux4=(node *)malloc(sizeof(node*));
-	aux4->coef=aux2->coef;
-	aux4->grd=aux2->grd;
-	aux3->next=aux4;
-	aux4->next=aux1;
+        aux4 = (node *)malloc(sizeof(node *));
+        aux4->coef = aux2->coef;
+        aux4->grd = aux2->grd;
+        aux3->next = aux4;
+        aux4->next = aux1;
         aux2 = aux2->next;
-	aux3=aux1;
-	aux1 = aux1->next;
+        aux3 = aux1;
+        aux1 = aux1->next;
       }
     }
     if (aux1->grd > aux2->grd) {
@@ -277,13 +277,14 @@ node *multiplicarPolinomioRyConc(node *p1, node *p2) {
   node *result = NULL;
   if (p1->grd <= p2->grd) {
     auxm = p1;
+    
     auxM = p2;
   } else {
     auxm = p2;
     auxM = p1;
   }
   while (auxm) {
-    result = multTerminoPorPolinomio(auxm->coef, auxm->grd , auxM, result);
+    result = multTerminoPorPolinomio(auxm->coef, auxm->grd, auxM, result);
     auxm = auxm->next;
   }
   return sumagrdIguales(result);
