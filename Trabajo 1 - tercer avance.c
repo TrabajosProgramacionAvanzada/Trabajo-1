@@ -262,32 +262,79 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   return rMult;
 }
 
-node *multTerminoPorPolinomio(long coef, long grd, node *head, node *result) {
-  node *aux = head;
-  while (aux != NULL) {
-    push(&result, coef * aux->coef, grd + aux->grd);
-    aux = aux->next;
+
+node * CoefXPol(long coef, long grd,node *p2, node *cdr){
+  node *aux = NULL;
+  node *auxP = NULL;
+  node *head=NULL;
+  auxP = p2;
+  if(cdr!=NULL){ 
+    aux = cdr;
+   while(auxP!=NULL && aux!= NULL){
+     aux->coef = aux->coef + auxP->coef * coef;
+      auxP=auxP->next;
+      aux = aux->next;
+    }
   }
-  return result;
+  if(cdr==NULL){
+    while(auxP!=NULL){
+      if(head==NULL){
+        cdr = malloc(sizeof(node));
+        cdr->coef = coef*auxP->coef;
+        cdr->grd = grd+auxP->grd;
+        cdr->next = NULL;
+        aux = cdr;
+        head = aux;
+        aux = aux->next;
+        auxP = auxP->next;
+      }else{
+        aux = (node *)malloc(sizeof(node));
+        aux->coef = coef*auxP->coef;
+        aux->grd = grd+auxP->grd;
+        aux->next = NULL;
+        head->next = aux;
+        head = aux;
+        aux = aux->next;
+        auxP = auxP->next;
+      }
+    }
+  }
+  return cdr;
 }
 
-node *multiplicarPolinomioRyConc(node *p1, node *p2) {
-  node *auxm = NULL;
-  node *auxM = NULL;
-  node *result = NULL;
-  if (p1->grd <= p2->grd) {
-    auxm = p1;
-    
-    auxM = p2;
-  } else {
-    auxm = p2;
-    auxM = p1;
+node * MultpPol(node *p1, node *p2, node *cdr){
+  node *car=NULL;
+  node *aux=NULL;
+  if(cdr==NULL){
+    car = (node *)malloc(sizeof(node)); 
+    car->coef=p1->coef*p2->coef;
+    car->grd=p1->grd+p2->grd;
+    car->next=NULL;
+    if(p2->next){
+      car->next = CoefXPol(p1->coef, p1->grd, p2->next, car->next);
+    }
+    if(p1->next){
+      cdr = sumarPolinomios(cdr, CoefXPol(p2->coef, p2->grd, p1->next, cdr));
+      car = sumarPolinomios(car, cdr);
+      cdr = eliminar(cdr);
+    }
+    if(p1->next && p2->next){
+      car->next = MultpPol(p1->next, p2, car->next);
+    }
+    return car;
+  }else{
+    cdr->coef = cdr->coef + (p1->coef * p2->coef);
+    if(p2->next){
+      cdr->next = CoefXPol(p1->coef, p1->grd, p2->next, cdr->next);
+    }
+    if(p1->next){
+      cdr->next = sumarPolinomios(cdr->next, CoefXPol(p1->coef, p1->grd, p1, cdr->next));
+    }
+    if(p1->next && p2->next){
+      cdr->next = MultpPol(p1->next, p2, cdr->next);
+    }
+    return cdr;
   }
-  while (auxm) {
-    result = multTerminoPorPolinomio(auxm->coef, auxm->grd, auxM, result);
-    auxm = auxm->next;
-  }
-  return sumagrdIguales(result);
 }
 
 // FunciÃ³n que despliega un menÃº para el usuario
@@ -385,7 +432,7 @@ void menu(node *head1, node *head2) {
       // printf("\nx  "
       //     "-----------------------------------------------------------------"
       //   "-----\n\n");
-      aux = multiplicarPolinomioRyConc(head1, head2);
+      aux = MultpPol(head1, head2, aux);
       display(&aux);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -434,14 +481,14 @@ int main() {
   srand(time(NULL)); // Se inicaliza la semilla de la funciÃ³n srand()
   node *head1 = NULL;
   node *head2 = NULL;
-  /*node *P = NULL;
-  head2 = generator(1000);
-  head1 = generator(1000);
+  node *P = NULL;
+  head2 = generator(10000);
+  head1 = generator(10000);
   display(&head1);
   display(&head2);
-  P = multiplicarPolinomioRyConc(head2, head1);
+  P = MultpPol(head2, head1,P);
   display(&P);
-  P = eliminar(P);*/
-  menu(head1, head2);
+  P = eliminar(P);
+  //menu(head1, head2);
   return 0;
 }
