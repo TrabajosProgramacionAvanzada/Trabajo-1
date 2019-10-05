@@ -6,7 +6,7 @@
 typedef struct nodeP {
   /*
     Estructura linked list que permite almacenar coeficiente y grado
-    de un polinomio de la forma a(x)=(asub(n-1)*bsub(n-1))xexp(n-1)+A(x)
+    de un polinomio de la forma a(x)=(asub(n-1)+A(x))
   */
   long coef;          // Coeficiente
   long grd;           // Grado
@@ -105,26 +105,6 @@ void display(node **head) {
     temp = temp->next; // Mover al siguiente nodo en la lista.
   }
   printf("\n");
-}
-
-node *sumagrdIguales(node *p) {
-  long n = 0;
-  node *final = NULL;
-  while (p->next != NULL) {
-    if (p->grd == p->next->grd) {
-      n = n + (p->coef + p->next->coef);
-    } else {
-      if (n > 0) {
-        push(&final, n, p->grd);
-        n = 0;
-      } else {
-        push(&final, p->coef, p->grd);
-      }
-    }
-    p = p->next;
-  }
-  push(&final, p->coef, p->grd);
-  return final;
 }
 
 long coefGenerator(long lsup) {
@@ -262,38 +242,39 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   return rMult;
 }
 
-
-node * CoefXPol(long coef, long grd,node *p2, node *cdr){
+node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
   node *aux = NULL;
   node *auxP = NULL;
-  node *head=NULL;
+  node *head = NULL;
   auxP = p2;
-  if(cdr!=NULL){ 
+  if (cdr != NULL) { // Si cdr no está vacío se actualizan los valores
     aux = cdr;
-   while(auxP!=NULL && aux!= NULL){
-     aux->coef = aux->coef + auxP->coef * coef;
-      auxP=auxP->next;
+    while (auxP != NULL && aux != NULL) {
+      aux->coef = aux->coef + auxP->coef * coef; // Actualizando
+      auxP = auxP->next;
       aux = aux->next;
     }
   }
-  if(cdr==NULL){
-    while(auxP!=NULL){
-      if(head==NULL){
-        cdr = malloc(sizeof(node));
-        cdr->coef = coef*auxP->coef;
-        cdr->grd = grd+auxP->grd;
+  if (cdr == NULL) { // Si aún quedan valores y cdr terminó, o cdr estaba vacío
+    while (auxP != NULL) {
+      if (head == NULL) { // Si no hay nodo anterior guardado
+        cdr = (node *)malloc(
+            sizeof(node)); // Se guarda el primer resultado en cdr como cabeza
+        cdr->coef = coef * auxP->coef;
+        cdr->grd = grd + auxP->grd;
         cdr->next = NULL;
-        aux = cdr;
-        head = aux;
+        aux = cdr;  // Se copia para avanzar sin perder la cabeza
+        head = aux; // Se copia para mantener un respaldo del nodo anterior al
+                    // avanzar
         aux = aux->next;
         auxP = auxP->next;
-      }else{
-        aux = (node *)malloc(sizeof(node));
-        aux->coef = coef*auxP->coef;
-        aux->grd = grd+auxP->grd;
+      } else {                              // De lo contrario
+        aux = (node *)malloc(sizeof(node)); // Se crea el nuevo resultado
+        aux->coef = coef * auxP->coef;
+        aux->grd = grd + auxP->grd;
         aux->next = NULL;
-        head->next = aux;
-        head = aux;
+        head->next = aux; // Se dirige el nodo anterior al actual
+        head = aux;       // Se copia el nodo actual y se pasa al siguiente
         aux = aux->next;
         auxP = auxP->next;
       }
@@ -302,39 +283,128 @@ node * CoefXPol(long coef, long grd,node *p2, node *cdr){
   return cdr;
 }
 
-node * MultpPol(node *p1, node *p2, node *cdr){
-  node *car=NULL;
-  node *aux=NULL;
-  if(cdr==NULL){
-    car = (node *)malloc(sizeof(node)); 
-    car->coef=p1->coef*p2->coef;
-    car->grd=p1->grd+p2->grd;
-    car->next=NULL;
-    if(p2->next){
+node *MultpPol(node *p1, node *p2, node *cdr) {
+  node *car = NULL;
+  if (cdr == NULL) { // Si el resultado está vacío, es la primera iteración
+    car = (node *)malloc(sizeof(node)); // Se define y guarda el primer elemento
+    car->coef = p1->coef * p2->coef;
+    car->grd = p1->grd + p2->grd;
+    car->next = NULL;
+    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
+                    // termino del primer polinomio
       car->next = CoefXPol(p1->coef, p1->grd, p2->next, car->next);
     }
-    if(p1->next){
-      cdr = sumarPolinomios(cdr, CoefXPol(p2->coef, p2->grd, p1->next, cdr));
-      car = sumarPolinomios(car, cdr);
-      cdr = eliminar(cdr);
+    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
+                    // termino del segundo polinomio
+      car->next = CoefXPol(p2->coef, p2->grd, p1->next, cdr);
     }
-    if(p1->next && p2->next){
+    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
       car->next = MultpPol(p1->next, p2, car->next);
     }
-    return car;
-  }else{
-    cdr->coef = cdr->coef + (p1->coef * p2->coef);
-    if(p2->next){
+    return car; // Se devuelve el primer elemento
+  } else {      // De lo contrario//
+    cdr->coef =
+        cdr->coef +
+        (p1->coef * p2->coef); // Se actualiza el primer elemento del resutlado
+    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
+                    // termino del primer polinomio
       cdr->next = CoefXPol(p1->coef, p1->grd, p2->next, cdr->next);
     }
-    if(p1->next){
-      cdr->next = sumarPolinomios(cdr->next, CoefXPol(p1->coef, p1->grd, p1, cdr->next));
+    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
+                    // termino del segundo polinomio
+      cdr->next = CoefXPol(p1->coef, p1->grd, p1->next, cdr->next);
     }
-    if(p1->next && p2->next){
+    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
       cdr->next = MultpPol(p1->next, p2, cdr->next);
     }
-    return cdr;
+    return cdr; // Se devuelve el resultado
   }
+}
+
+node *splitPoly(node *head, long min) {
+  node *cdr = NULL;
+  node *aux = NULL;
+  cdr = head;
+  while (cdr->grd != min) {
+    cdr = cdr->next;
+  }
+  aux = cdr;
+  cdr = cdr->next;
+  aux->next = NULL;
+  return cdr;
+}
+
+node *MultDivYConq(node *p1, node *p2, node *result) {
+  node *cdr1 = NULL;
+  node *cdr2 = NULL;
+  node *aux = NULL;
+  if (p1->next &&
+      p2->next) { // Si existen ambas continuaciones se sigue con la recursión
+    cdr1 = splitPoly(p1, ((p1->grd) / 2) + 1);
+    cdr2 = splitPoly(p2, ((p2->grd) / 2) + 1);
+    result = MultDivYConq(p1, p2, result);
+    result = MultDivYConq(cdr2, p1, result);
+    result = MultDivYConq(cdr1, p2, result);
+    result = MultDivYConq(cdr1, cdr2, result);
+  } else {          // De lo contrario
+    if (p1->next) { // Si sólo continúa p1
+      result =
+          CoefXPol(p2->coef, p2->grd, p1, result); // Se multiplica directamente
+    } else {
+      if (p2->next) { // Reciproco del caso anterior
+        result = CoefXPol(p1->coef, p1->grd, p2, result);
+      } else {         // Si ninguno continúa
+        if (!result) { // Si no hay elementos en el resultado
+          result = (node *)malloc(sizeof(node)); // Se añade y guarda
+          result->coef = (p1->coef * p2->coef);
+          result->grd = p1->grd + p2->grd;
+          result->next = NULL;
+        } else { // Si ya hay contentido en el resultado//Problema empieza desde
+                 // acá
+          cdr1 = result;
+          if (cdr1->grd >
+              (p1->grd +
+               p2->grd)) { // Si la cabeza actual es mayor al término a ingresar
+            printf("\nsoy mayor\n");
+            while (cdr1->grd > (p1->grd + p2->grd) &&
+                   cdr1 != NULL) { // Se avanza hasta la posición correcta
+              cdr2 = cdr1;         // Y se guarda la posición anterior
+              cdr1 = cdr1->next;
+              printf("\nsigo\n");
+            } // No se sale del while
+            printf("\ny salgo\n");
+            if (cdr1->grd != (p1->grd + p2->grd)) { // Si se llegó a la posición
+              printf("\nme añado\n");
+              aux = (node *)malloc(sizeof(node)); // Se añade
+              aux->coef = (p1->coef * p2->coef);
+              aux->grd = p1->grd + p2->grd;
+              aux->next = NULL;
+              cdr2->next = aux;
+              aux->next = cdr1;
+            } else { // De lo contrario el término ya existia, por lo que se
+                     // actualiza
+              printf("\no me actualizo\n");
+              aux->coef = aux->coef + (p1->coef * p2->coef);
+            }
+          } else {                                 // Si no es mayor
+            if (cdr1->grd < (p1->grd + p2->grd)) { // Pero si mayor
+              printf("\nsoy menor\n");
+              aux = (node *)malloc(sizeof(node)); // Se añade en la cabeza
+              aux->coef = (p1->coef * p2->coef);
+              aux->grd = p1->grd + p2->grd;
+              aux->next = cdr1;
+              result = aux;
+            } else { // De lo contrario el término a ingresar ya existe,
+                     // entonces se actualiza
+              printf("\nsoy igual, me actualizo\n");
+              aux->coef = aux->coef + (p1->coef * p2->coef);
+            }
+          }
+        }
+      }
+    }
+  }
+  return result; // Se retorna el resultado
 }
 
 // FunciÃ³n que despliega un menÃº para el usuario
@@ -482,13 +552,19 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(10000);
-  head1 = generator(10000);
+  // head2 = generator(10000);
+  // head1 = generator(10000);
+  push(&head1, 1, 1);
+  push(&head1, 1, 0);
+  push(&head2, 1, 1);
+  push(&head2, 1, 0);
   display(&head1);
   display(&head2);
-  P = MultpPol(head2, head1,P);
+  P = MultDivYConq(head2, head1, P);
   display(&P);
   P = eliminar(P);
-  //menu(head1, head2);
+  head2 = eliminar(head2);
+  head1 = eliminar(head1);
+  // menu(head1, head2);
   return 0;
 }
