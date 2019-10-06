@@ -161,7 +161,7 @@ node *ingresar_plinomio(long grds) {
 }
 
 // Funcion que suma dos polinomios
-node *sumarPolinomios(node *p1, node *p2) {
+node *sumarPolinomios(node *p1, node *p2, int suma) {
   node *aux1 = NULL;
   node *aux2 = NULL;
   node *aux3 = NULL;
@@ -172,7 +172,10 @@ node *sumarPolinomios(node *p1, node *p2) {
     if (aux1->grd < aux2->grd) {
       if (aux1->grd > aux2->next->grd) {
         aux4 = (node *)malloc(sizeof(node *));
-        aux4->coef = aux2->coef;
+        if (suma)
+          aux4->coef = aux2->coef;
+        else
+          aux4->coef = aux2->coef * -1;
         aux4->grd = aux2->grd;
         aux3->next = aux4;
         aux4->next = aux1;
@@ -184,45 +187,15 @@ node *sumarPolinomios(node *p1, node *p2) {
     if (aux1->grd > aux2->grd) {
       aux2 = aux2->next;
     } else {
-      aux1->coef = aux1->coef + aux2->coef;
+      if (suma)
+        aux1->coef = aux1->coef + aux2->coef;
+      else
+        aux1->coef = aux1->coef - aux2->coef;
       aux1 = aux1->next;
       aux2 = aux2->next;
     }
   }
   return p1;
-}
-
-// Funcion que resta dos polinomios
-node *restaPolinomios(node *p1, node *p2) {
-  node *pFinal = NULL;
-  while (p1 != NULL && p2 != NULL) {
-    if (p1->grd == p2->grd) {
-      push(&pFinal, p2->coef, p1->grd);
-      p1 = p1->next;
-      p2 = p2->next;
-    } else if (p1->grd > p2->grd) {
-      push(&pFinal, p1->coef, p1->grd);
-      p1 = p1->next;
-    } else if (p2->grd > p1->grd) {
-      push(&pFinal, (p2->coef) * -1, p2->grd);
-      p2 = p2->next;
-    }
-  }
-  if (p1 != NULL) {
-    while (p1 != NULL) {
-      push(&pFinal, p1->coef, p1->grd);
-      p1 = p1->next;
-    }
-  }
-  if (p2 != NULL) {
-    while (p2 != NULL) {
-      push(&pFinal, (p2->coef) * -1, p2->grd);
-      p2 = p2->next;
-    }
-  }
-  p1 = eliminar(p1);
-  p2 = eliminar(p2);
-  return pFinal;
 }
 
 node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
@@ -365,17 +338,23 @@ node *MultDivYConq(node *p1, node *p2, node *result) {
           if (cdr1->grd >
               (p1->grd +
                p2->grd)) { // Si la cabeza actual es mayor al término a ingresar
-            printf("\nsoy mayor\n");
-            while (cdr1->grd > (p1->grd + p2->grd) &&
-                   cdr1 != NULL) { // Se avanza hasta la posición correcta
-              cdr2 = cdr1;         // Y se guarda la posición anterior
+            while (cdr1 &&
+                   cdr1->grd >
+                       (p1->grd +
+                        p2->grd)) { // Se avanza hasta la posición correcta
+              cdr2 = cdr1;          // Y se guarda la posición anterior
               cdr1 = cdr1->next;
-              printf("\nsigo\n");
-            } // No se sale del while
-            printf("\ny salgo\n");
+            }
+            if (!cdr1) { // Si se llegó al final del resultado
+              aux = (node *)malloc(sizeof(node)); // Se añade al final
+              aux->coef = (p1->coef * p2->coef);
+              aux->grd = p1->grd + p2->grd;
+              aux->next = NULL;
+              cdr2->next = aux;
+              return result;
+            }
             if (cdr1->grd != (p1->grd + p2->grd)) { // Si se llegó a la posición
-              printf("\nme añado\n");
-              aux = (node *)malloc(sizeof(node)); // Se añade
+              aux = (node *)malloc(sizeof(node));   // Se añade
               aux->coef = (p1->coef * p2->coef);
               aux->grd = p1->grd + p2->grd;
               aux->next = NULL;
@@ -383,20 +362,17 @@ node *MultDivYConq(node *p1, node *p2, node *result) {
               aux->next = cdr1;
             } else { // De lo contrario el término ya existia, por lo que se
                      // actualiza
-              printf("\no me actualizo\n");
-              aux->coef = aux->coef + (p1->coef * p2->coef);
+              cdr1->coef = cdr1->coef + (p1->coef * p2->coef);
             }
           } else {                                 // Si no es mayor
             if (cdr1->grd < (p1->grd + p2->grd)) { // Pero si mayor
-              printf("\nsoy menor\n");
-              aux = (node *)malloc(sizeof(node)); // Se añade en la cabeza
+              aux = (node *)malloc(sizeof(node));  // Se añade en la cabeza
               aux->coef = (p1->coef * p2->coef);
               aux->grd = p1->grd + p2->grd;
               aux->next = cdr1;
               result = aux;
             } else { // De lo contrario el término a ingresar ya existe,
                      // entonces se actualiza
-              printf("\nsoy igual, me actualizo\n");
               aux->coef = aux->coef + (p1->coef * p2->coef);
             }
           }
@@ -427,21 +403,20 @@ void menu(node *head1, node *head2) {
       scanf("%ld", &grdo1);
       printf("\nIngrese el grado maximo del segundo polinomio: ");
       scanf("%ld", &grdo2);
-      aux = eliminar(aux);
       head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
                                // polinomio creado en la lista
       head2 = eliminar(head2);
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
-      /*     printf("\nEl primer polinomio generado:\n\n");
+      /*  printf("\nEl primer polinomio generado:\n\n");
            display(&head1);
            printf("\nEl segundo polinomio generado:\n\n");
            display(&head2);
            printf("\n+--------------------------------------------------------------"
                   "--------\n\n");
         */
-      head1 = sumarPolinomios(head1, head2);
+      head1 = sumarPolinomios(head1, head2, 1);
       display(&head1);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -451,24 +426,23 @@ void menu(node *head1, node *head2) {
       scanf("%ld", &grdo1);
       printf("\nIngrese el grado maximo del segundo polinomio: ");
       scanf("%ld", &grdo2);
-      aux = eliminar(aux);
       head1 = eliminar(head1); // Eliminamos la memoria por si ya hay un
                                // polinomio creado en la lista
       head2 = eliminar(head2);
       head1 = generator(
           grdo1); // Genera un polinomio de grado n con coeficientes aleatorios
       head2 = generator(grdo2);
-      /*      printf("\nEl primer polinomio generado:\n\n");
+      /*printf("\nEl primer polinomio generado:\n\n");
     display(&head1);
     printf("\nEl segundo polinomio generado:\n\n");
     display(&head2);
     printf("\n-  "
            "-----------------------------------------------------------------"
            "-----\n\n");*/
-      aux = restaPolinomios(head1, head2);
-      head1 = eliminar(head1);
+      head1 = sumarPolinomios(head1, head2, 0);
       head2 = eliminar(head2);
-      display(&aux);
+      display(&head1);
+      head1 = eliminar(head1);
       break;
     case 3:
       printf("\nIngrese el grado maximo del polinomio: ");
@@ -552,14 +526,8 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  // head2 = generator(10000);
-  // head1 = generator(10000);
-  push(&head1, 1, 1);
-  push(&head1, 1, 0);
-  push(&head2, 1, 1);
-  push(&head2, 1, 0);
-  display(&head1);
-  display(&head2);
+  head2 = generator(3);
+  head1 = generator(3);
   P = MultDivYConq(head2, head1, P);
   display(&P);
   P = eliminar(P);
