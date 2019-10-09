@@ -161,37 +161,48 @@ node *ingresar_plinomio(long grds) {
 }
 
 // Funcion que suma dos polinomios
-node *sumarPolinomios(node *p1, node *p2, int suma) {
+node *sumarPolinomios(node *p1, node *p2) {
   node *aux1 = NULL;
   node *aux2 = NULL;
   node *aux3 = NULL;
   node *aux4 = NULL;
   aux1 = p1;
   aux2 = p2;
+  aux3 = NULL;
   while (aux1 && aux2) {
-    if (aux1->grd < aux2->grd) {
-      if (aux1->grd > aux2->next->grd) {
-        aux4 = (node *)malloc(sizeof(node *));
-        if (suma)
-          aux4->coef = aux2->coef;
-        else
-          aux4->coef = aux2->coef * -1;
-        aux4->grd = aux2->grd;
-        aux3->next = aux4;
-        aux4->next = aux1;
-        aux2 = aux2->next;
-        aux3 = aux1;
-        aux1 = aux1->next;
+    if(aux1->grd == aux2->grd){
+      aux1->coef = ((long)aux1->coef + (long)aux2->coef);
+      aux3 = aux1;
+      aux1 = aux1->next;
+      aux2 = aux2->next;
+    }else{
+      if(aux1->grd > aux2->grd){
+	aux3 = aux1;
+	aux1 = aux1->next;
+      }else{
+	aux4 = (node *)malloc(sizeof(node));
+	aux4->coef = aux2->coef;
+	aux4->grd = aux2->grd;
+	aux4->next = aux1;
+	if (aux3)
+	  aux3->next = aux4;
+	else{
+	  aux3 = aux4;
+	  p1 = aux4;
+	}
+	aux3 = aux4;
+	aux2 = aux2->next;
       }
     }
-    if (aux1->grd > aux2->grd) {
-      aux2 = aux2->next;
-    } else {
-      if (suma)
-        aux1->coef = aux1->coef + aux2->coef;
-      else
-        aux1->coef = aux1->coef - aux2->coef;
-      aux1 = aux1->next;
+  }
+  if(!aux1 && aux2){
+    while(aux2){
+      aux4 = (node *)malloc(sizeof(node));
+      aux4->coef = aux2->coef;
+      aux4->grd = aux2->grd;
+      aux4->next = NULL;
+      aux3->next = aux4;
+      aux3 = aux4;
       aux2 = aux2->next;
     }
   }
@@ -294,47 +305,101 @@ node *MultpPol(node *p1, node *p2, node *cdr) {
   }
 }
 
-node *splitPoly(node *head, long min) {
+void splitPoly(node *head, long min, node*split[2]) {
   node *cdr = NULL;
-  node *aux = NULL;
   cdr = head;
   while (cdr->grd != min) {
+    cdr->grd = cdr->grd;
     cdr = cdr->next;
   }
-  aux = cdr;
-  cdr = cdr->next;
-  aux->next = NULL;
-  return cdr;
+  split[0] = cdr;
+  split[1] = cdr->next;
+  split[0]->next = NULL;
+  return;
 }
 
-node *MultDivYConq(node *p1, node *p2, node *result) {
+node *MultDivYConq(node *p1, node *p2){
+  node *cdr1[2];
+  node *cdr2[2];
+  node *aux = NULL;
+  node *result = NULL;
+  if (p1->next &&
+      p2->next) { // Si existen ambas continuaciones se sigue con la recursión
+    splitPoly(p1, ((p1->grd) / 2) + 1, cdr1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
+    splitPoly(p2, ((p2->grd) / 2) + 1, cdr2);//p2 = B1(x) ; cdr2 = B0(X)*x^2
+    aux = MultpPol(p1,p2,aux);
+    result = MultpPol(p1, cdr2[1], result);
+    result = sumarPolinomios(result, aux);
+    aux = eliminar(aux);
+    aux = MultpPol(p2, cdr1[1], aux);
+    result = sumarPolinomios(result, aux);
+    aux = eliminar(aux);
+    aux = MultpPol(cdr2[1], cdr1[1], aux);
+    result = sumarPolinomios(result, aux);
+    aux = eliminar(aux);
+    cdr1[0]->next = cdr1[1];
+    cdr2[0]->next = cdr2[1];
+  }else{
+    if(p1->next){
+      result = CoefXPol(p2->coef, p2->grd, p1, result);
+    }else{
+      result = CoefXPol(p1->coef, p1->grd, p2, result);
+    }
+  }
+  return result;
+}
+/*
+node *MultDivYConq0(node *p1, node *p2) {
   node *cdr1 = NULL;
   node *cdr2 = NULL;
   node *aux = NULL;
+  node *result = NULL;
+  printf("\nentre!\n");
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    cdr1 = splitPoly(p1, ((p1->grd) / 2) + 1);
-    cdr2 = splitPoly(p2, ((p2->grd) / 2) + 1);
-    result = MultDivYConq(p1, p2, result);
-    result = MultDivYConq(cdr2, p1, result);
-    aux = MultDivYConq(cdr1, p2, aux);
-    result = sumarPolinomios(result, aux, 1);
-    result = MultDivYConq(cdr1, cdr2, result);
+    cdr1 = splitPoly(p1, ((p1->grd) / 2) + 1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
+    cdr2 = splitPoly(p2, ((p2->grd) / 2) + 1);//p2 = B1(x) ; cdr2 = B0(X)*x^2
+    //multdivyconq(p1,p2)
+    //multdivyconq(p1, cdr2)*x^²
+    //multdivyconq(p2, cdr1)*x^²
+    //multdivyconq(cdr1, cdr2)*x^4
+    result = MultDivYConq0(p1, p2);
+    display(&result);
+    aux = CoefXPol(1, 2, MultDivYConq0(p1, cdr2), aux);
+    result = sumarPolinomios(result, aux);
+    aux = eliminar(aux);
+    aux = CoefXPol(1, 2, MultDivYConq0(p2, cdr1), aux);
+    result = sumarPolinomios(result, aux);
+    aux = eliminar(aux);
+    aux = CoefXPol(1, 4, MultDivYConq0(cdr2, cdr1), aux);
+    result = sumarPolinomios(result, aux);
   } else { // De lo contrario
-    if (p1->next) {
-      push(&result, p1->coef * p2->coef, p1->grd + p2->grd);
-      push(&result, p1->next->coef * p2->coef, p1->next->grd + p2->grd);
-    } else {
-      if (p2->next) {
-	push(&result, p1->coef * p2->coef, p1->grd + p2->grd);
-	push(&result, p2->next->coef * p1->coef, p2->next->grd + p1->grd);
-      } else {
-	push(&result, p1->coef * p2->coef, p1->grd + p2->grd);
+    if(p1->next){
+      printf("\np1 sigue\n");
+      aux = CoefXPol(p2->coef, p2->grd, p1, aux);
+      if(result)
+	result = sumarPolinomios(result, aux);
+      else{
+	result = aux;
+	return result;
+      }
+    }else{
+      printf("\np2 sigue\n");
+      aux = CoefXPol(p1->coef, p1->grd, p2, aux);
+      display(&aux);
+      if(result)
+	result = sumarPolinomios(result, aux);
+      else{
+	result = aux;
+       	display(&result);
+	return result;
       }
     }
+    aux = eliminar(aux);
+    display(&result);
   }
   return result; // Se retorna el resultado
-}
+  }*/
 
 // FunciÃ³n que despliega un menÃº para el usuario
 
@@ -369,7 +434,7 @@ void menu(node *head1, node *head2) {
            printf("\n+--------------------------------------------------------------"
                   "--------\n\n");
         */
-      head1 = sumarPolinomios(head1, head2, 1);
+      head1 = sumarPolinomios(head1, head2);
       display(&head1);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -392,7 +457,7 @@ void menu(node *head1, node *head2) {
     printf("\n-  "
            "-----------------------------------------------------------------"
            "-----\n\n");*/
-      head1 = sumarPolinomios(head1, head2, 0);
+      head1 = sumarPolinomios(head1, head2);
       head2 = eliminar(head2);
       display(&head1);
       head1 = eliminar(head1);
@@ -479,9 +544,9 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(4);
-  head1 = generator(4);
-  P = MultDivYConq(head2, head1, P);
+  head2 = generator(100000);
+  head1 = generator(100000);
+  P = MultDivYConq(head2, head1);
   display(&P);
   P = eliminar(P);
   head2 = eliminar(head2);
