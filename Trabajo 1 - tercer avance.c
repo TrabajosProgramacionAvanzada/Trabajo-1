@@ -20,33 +20,12 @@ void push(node **head, long coef, long grd) {
   /*
     Inserta el elemento al inicio de la linkedList.
   */
-  node *aux;
   node *nNode =
-      (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
+    (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;               // Asignar coef a coef
   nNode->grd = grd;                 // Asignar el grado
-  if (*head == NULL || (*head)->grd < grd) {
-    nNode->next = *head; // Apuntar a head
-    *head = nNode;       // Igualaron head al nodo temporal.
-  } else {
-    aux = (*head);
-    if ((long)aux->grd == (long)nNode->grd) {
-      aux->coef = aux->coef + grd;
-      free(nNode);
-      return;
-    }
-    while (aux->next != NULL && (long)aux->next->grd > (long)nNode->grd) {
-      aux = aux->next;
-    }
-    if (aux && (long)aux->grd == (long)nNode->grd) {
-      aux->coef = aux->coef + grd;
-      free(nNode);
-      return;
-    } else {
-      nNode->next = aux->next;
-      aux->next = nNode;
-    }
-  }
+  nNode->next = *head; // Apuntar a head
+  *head = nNode;       // Igualaron head al nodo temporal.
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -196,34 +175,28 @@ node *sumarPolinomios(node *p1, node *p2) {
     }
   }
   if(!aux1 && aux2){
-    while(aux2){
+    if(!p1){
       aux4 = (node *)malloc(sizeof(node));
       aux4->coef = aux2->coef;
       aux4->grd = aux2->grd;
       aux4->next = NULL;
-      aux3->next = aux4;
-      aux3 = aux4;
+      p1 = aux4;
+      aux3 = p1;
       aux2 = aux2->next;
+    }
+    if(p1){
+      while(aux2){
+	aux4 = (node *)malloc(sizeof(node));
+	aux4->coef = aux2->coef;
+	aux4->grd = aux2->grd;
+	aux4->next = NULL;
+	aux3->next = aux4;
+	aux3 = aux4;
+	aux2 = aux2->next;
+      }
     }
   }
   return p1;
-}
-
-node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
-  node *cP1 = NULL;
-  node *rMult = NULL;
-  cP1 = p1;
-  while (p2 != NULL) {    // Se itera en el segundo polinomio
-    while (cP1 != NULL) { // Se le multiplica cada término del segundo polinomio
-                          // al primer polinomio
-      push(&rMult, (long)(cP1->coef) * (long)(p2->coef),
-           (cP1->grd) + (p2->grd)); // Se ingresa a una pila nueva
-      cP1 = cP1->next;
-    }
-    p2 = p2->next; // Se avanza
-    cP1 = p1;
-  }
-  return rMult;
 }
 
 node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
@@ -266,6 +239,21 @@ node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
   }
   return cdr;
 }
+
+node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
+  node *cP1 = NULL;
+  node * aux = NULL;
+  node *rMult = NULL;
+  cP1 = p1;
+  while(cP1){
+    aux = CoefXPol(cP1->coef, cP1->grd, p2, aux);
+    rMult = sumarPolinomios(rMult, aux);
+    aux = eliminar(aux);
+    cP1 = cP1->next;
+  }
+  return rMult;
+}
+
 
 node *MultpPol(node *p1, node *p2, node *cdr) {
   node *car = NULL;
@@ -348,7 +336,8 @@ node *MultDivYConq(node *p1, node *p2){
   }
   return result;
 }
-/*
+
+
 node *MultDivYConq0(node *p1, node *p2) {
   node *cdr1 = NULL;
   node *cdr2 = NULL;
@@ -357,49 +346,9 @@ node *MultDivYConq0(node *p1, node *p2) {
   printf("\nentre!\n");
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    cdr1 = splitPoly(p1, ((p1->grd) / 2) + 1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
-    cdr2 = splitPoly(p2, ((p2->grd) / 2) + 1);//p2 = B1(x) ; cdr2 = B0(X)*x^2
-    //multdivyconq(p1,p2)
-    //multdivyconq(p1, cdr2)*x^²
-    //multdivyconq(p2, cdr1)*x^²
-    //multdivyconq(cdr1, cdr2)*x^4
-    result = MultDivYConq0(p1, p2);
-    display(&result);
-    aux = CoefXPol(1, 2, MultDivYConq0(p1, cdr2), aux);
-    result = sumarPolinomios(result, aux);
-    aux = eliminar(aux);
-    aux = CoefXPol(1, 2, MultDivYConq0(p2, cdr1), aux);
-    result = sumarPolinomios(result, aux);
-    aux = eliminar(aux);
-    aux = CoefXPol(1, 4, MultDivYConq0(cdr2, cdr1), aux);
-    result = sumarPolinomios(result, aux);
-  } else { // De lo contrario
-    if(p1->next){
-      printf("\np1 sigue\n");
-      aux = CoefXPol(p2->coef, p2->grd, p1, aux);
-      if(result)
-	result = sumarPolinomios(result, aux);
-      else{
-	result = aux;
-	return result;
-      }
-    }else{
-      printf("\np2 sigue\n");
-      aux = CoefXPol(p1->coef, p1->grd, p2, aux);
-      display(&aux);
-      if(result)
-	result = sumarPolinomios(result, aux);
-      else{
-	result = aux;
-       	display(&result);
-	return result;
-      }
-    }
-    aux = eliminar(aux);
-    display(&result);
-  }
+    
   return result; // Se retorna el resultado
-  }*/
+}
 
 node *karatsuba(node *p1, node *p2){//Un sólo paso
   //A(x)*B(x)= (z1 + z2 + (z3 * z4 - z1 -z2))
@@ -557,9 +506,9 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(100000);
-  head1 = generator(100000);
-  P = MultDivYConq(head2, head1);
+  head2 = generator(10000);
+  head1 = generator(10000);
+  P = multiplicarPolinomioFBrut(head2, head1);
   display(&P);
   P = eliminar(P);
   head2 = eliminar(head2);
