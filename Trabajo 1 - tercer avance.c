@@ -401,6 +401,19 @@ node *MultDivYConq0(node *p1, node *p2) {
   return result; // Se retorna el resultado
   }*/
 
+node *karatsuba(node *p1, node *p2){//Un sólo paso
+  //A(x)*B(x)= (z1 + z2 + (z3 * z4 - z1 -z2))
+  node *result = NULL;
+  node *cdr1[2];//a1(x)||a0(x)
+  node *cdr2[2];//b1(x)||b0(x)
+  node *z1 = NULL;//a1(x)*b1(x)
+  node *z2 = NULL;//a0(x)*b0(x)
+  node *z3 = NULL;//a0(x)+a1(x)
+  node *z4 = NULL;//b0(x)+b1(x)
+  return result;
+}
+
+
 // FunciÃ³n que despliega un menÃº para el usuario
 
 void menu(node *head1, node *head2) {
