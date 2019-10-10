@@ -140,7 +140,7 @@ node *ingresar_plinomio(long grds) {
 }
 
 // Funcion que suma dos polinomios
-node *sumarPolinomios(node *p1, node *p2) {
+node *sumarPolinomios(node *p1, node *p2, int suma) {
   node *aux1 = NULL;
   node *aux2 = NULL;
   node *aux3 = NULL;
@@ -150,7 +150,7 @@ node *sumarPolinomios(node *p1, node *p2) {
   aux3 = NULL;
   while (aux1 && aux2) {
     if(aux1->grd == aux2->grd){
-      aux1->coef = ((long)aux1->coef + (long)aux2->coef);
+      aux1->coef = ((long)aux1->coef + (long)aux2->coef*suma);
       aux3 = aux1;
       aux1 = aux1->next;
       aux2 = aux2->next;
@@ -160,7 +160,7 @@ node *sumarPolinomios(node *p1, node *p2) {
 	aux1 = aux1->next;
       }else{
 	aux4 = (node *)malloc(sizeof(node));
-	aux4->coef = aux2->coef;
+	aux4->coef = aux2->coef*suma;
 	aux4->grd = aux2->grd;
 	aux4->next = aux1;
 	if (aux3)
@@ -177,7 +177,7 @@ node *sumarPolinomios(node *p1, node *p2) {
   if(!aux1 && aux2){
     if(!p1){
       aux4 = (node *)malloc(sizeof(node));
-      aux4->coef = aux2->coef;
+      aux4->coef = aux2->coef*suma;
       aux4->grd = aux2->grd;
       aux4->next = NULL;
       p1 = aux4;
@@ -187,7 +187,7 @@ node *sumarPolinomios(node *p1, node *p2) {
     if(p1){
       while(aux2){
 	aux4 = (node *)malloc(sizeof(node));
-	aux4->coef = aux2->coef;
+	aux4->coef = aux2->coef*suma;
 	aux4->grd = aux2->grd;
 	aux4->next = NULL;
 	aux3->next = aux4;
@@ -247,7 +247,7 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   cP1 = p1;
   while(cP1){
     aux = CoefXPol(cP1->coef, cP1->grd, p2, aux);
-    rMult = sumarPolinomios(rMult, aux);
+    rMult = sumarPolinomios(rMult, aux, 1);
     aux = eliminar(aux);
     cP1 = cP1->next;
   }
@@ -329,13 +329,13 @@ node *MultDivYConq0(node *p1, node *p2, node *p1final, node *p2final){
     splitPoly(p2, cdr2, p2final);//p2 = B1(x) ; cdr2 = B0(X)*x^2
     aux = MultDivYConq0(p1,p2,cdr1[0], cdr2[0]);
     result = MultDivYConq0(p1, cdr2[1], cdr1[0], cdr2[2]);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     aux = MultDivYConq0(p2, cdr1[1], cdr2[0], cdr1[2]);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     aux = MultDivYConq0(cdr1[1], cdr2[1], cdr1[2], cdr2[2]);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
     cdr2[0]->next = cdr2[1];
@@ -361,13 +361,13 @@ node *MultDivYConq(node *p1, node *p2){
     splitPoly(p2, cdr2, NULL);//p2 = B1(x) ; cdr2 = B0(X)*x^2
     aux = MultDivYConq0(p1,p2,cdr1[0], cdr2[0]);
     result = MultDivYConq0(p1, cdr2[1], cdr1[0], NULL);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     aux = MultDivYConq0(p2, cdr1[1], cdr2[0], NULL);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     aux = MultDivYConq0(cdr2[1], cdr1[1], NULL, NULL);
-    result = sumarPolinomios(result, aux);
+    result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
     cdr2[0]->next = cdr2[1];
@@ -382,19 +382,32 @@ node *MultDivYConq(node *p1, node *p2){
 }
 
 
-/*
+
 node *karatsuba(node *p1, node *p2){//Un sólo paso
   //A(x)*B(x)= (z1 + z2 + (z3 * z4 - z1 -z2))
   node *result = NULL;
-  node *cdr1[2];//a1(x)||a0(x)
-  node *cdr2[2];//b1(x)||b0(x)
+  node *cdr1[3];//a1(x)||a0(x)
+  node *cdr2[3];//b1(x)||b0(x)
   node *z1 = NULL;//a1(x)*b1(x)
   node *z2 = NULL;//a0(x)*b0(x)
-  node *z3 = NULL;//a0(x)+a1(x)
-  node *z4 = NULL;//b0(x)+b1(x)
+  node *z3 = NULL;//a0(x)+b1(x)
+  node *z4 = NULL;//a1(x)*b0(x)
+  splitPoly(p1, cdr1, NULL);
+  splitPoly(p2, cdr2, NULL);
+  z1 = MultpPol(p1, p2, z1);
+  z2 = MultpPol(cdr1[1], cdr2[1], z2);
+  z3 = sumarPolinomios(z3, p1,1);
+  z3 = sumarPolinomios(z3, cdr2[1],1);
+  z4 = MultpPol(cdr1[1], p2, z4);
+  result = sumarPolinomios(result, z1,1);
+  result = sumarPolinomios(result, z2,1);
+  z3 = sumarPolinomios(z3, z4,1);
+  z3 = sumarPolinomios(z3, z1,-1);
+  z3 = sumarPolinomios(z3, z2,-1);
+  result = sumarPolinomios(result, z3, 1);
   return result;
 }
-*/
+
 
 // FunciÃ³n que despliega un menÃº para el usuario
 
@@ -429,7 +442,7 @@ void menu(node *head1, node *head2) {
            printf("\n+--------------------------------------------------------------"
                   "--------\n\n");
         */
-      head1 = sumarPolinomios(head1, head2);
+      head1 = sumarPolinomios(head1, head2, 1);
       display(&head1);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -452,7 +465,7 @@ void menu(node *head1, node *head2) {
     printf("\n-  "
            "-----------------------------------------------------------------"
            "-----\n\n");*/
-      head1 = sumarPolinomios(head1, head2);
+      head1 = sumarPolinomios(head1, head2,-1);
       head2 = eliminar(head2);
       display(&head1);
       head1 = eliminar(head1);
@@ -539,9 +552,9 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(10000);
-  head1 = generator(10000);
-  P = MultDivYConq(head2, head1);
+  head2 = generator(2);
+  head1 = generator(2);
+  P = karatsuba(head2, head1);
   display(&P);
   P = eliminar(P);
   head2 = eliminar(head2);
