@@ -293,54 +293,51 @@ node *MultpPol(node *p1, node *p2, node *cdr) {
   }
 }
 
-void splitPoly(node *head, node*split[3], node *final) {
+void splitPoly(node *head, node*split[2], long largo) {
   node *cdr = NULL;
   node *aux = NULL;
-  long largo;
-  long corte;
-  if (final)
-    largo = head->grd - (final->grd - 1);//largo es igual al grado mayor menos el grado final menos uno
-  else
-    largo = head->grd +1;//Si no hay grado final, es el grado mayor más uno
+  if(largo == 1){
+    return;
+  }
+  long corte = largo/2;
   cdr = head;
-  corte = largo/2;
-  while (cdr) {//Se avanza n/2 posiciones
-    if (corte == 1)
-      aux = cdr;
-    split[2] = cdr;
+  while (corte && cdr) {//Se avanza n/2 posiciones
+    aux = cdr;
     cdr = cdr->next;
     corte--;
   }
   split[0] = aux;//Posición (n/2)-1
-  split[1] = aux->next;//Posición n/2
+  split[1] = cdr;//Posición n/2
   split[0]->next = NULL;
   return;
 }
 
 
-node *MultDivYConq0(node *p1, node *p2, node *p1final, node *p2final){
-  node *cdr1[3];
-  node *cdr2[3];
+node *MultDivYConq0(node *p1, node *p2, long largo1, long largo2){
+  node *cdr1[2];
+  node *cdr2[2];
   node *aux = NULL;
   node *result = NULL;
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    splitPoly(p1, cdr1, p1final);//p1 = A1(x) ; cdr1 = A0(x)*x^2
-    splitPoly(p2, cdr2, p2final);//p2 = B1(x) ; cdr2 = B0(X)*x^2
-    aux = MultDivYConq0(p1,p2,cdr1[0], cdr2[0]);
-    result = MultDivYConq0(p1, cdr2[1], cdr1[0], cdr2[2]);
+    splitPoly(p1, cdr1, largo1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
+    splitPoly(p2, cdr2, largo2);//p2 = B1(x) ; cdr2 = B0(X)*x^2
+    largo1 = largo1/2;
+    largo2 = largo2/2;
+    aux = MultDivYConq0(p1,p2,largo1,largo2);
+    result = MultDivYConq0(p1, cdr2[1], largo1, largo2);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(p2, cdr1[1], cdr2[0], cdr1[2]);
+    aux = MultDivYConq0(p2, cdr1[1], largo2, largo1);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(cdr1[1], cdr2[1], cdr1[2], cdr2[2]);
+    aux = MultDivYConq0(cdr1[1], cdr2[1], largo1, largo2);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
     cdr2[0]->next = cdr2[1];
   }else{
-    if(p1->next){
+    if(p1->next && !p2->next){
       result = CoefXPol(p2->coef, p2->grd, p1, result);
     }else{
       result = CoefXPol(p1->coef, p1->grd, p2, result);
@@ -357,16 +354,16 @@ node *MultDivYConq(node *p1, node *p2){
   node *result = NULL;
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    splitPoly(p1, cdr1, NULL);//p1 = A1(x) ; cdr1 = A0(x)*x^2
-    splitPoly(p2, cdr2, NULL);//p2 = B1(x) ; cdr2 = B0(X)*x^2
-    aux = MultDivYConq0(p1,p2,cdr1[0], cdr2[0]);
-    result = MultDivYConq0(p1, cdr2[1], cdr1[0], NULL);
+    splitPoly(p1, cdr1, p1->grd+1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
+    splitPoly(p2, cdr2, p2->grd+1);//p2 = B1(x) ; cdr2 = B0(X)*x^2
+    aux = MultDivYConq0(p1,p2,(p1->grd+1)/2,(p2->grd+1)/2);
+    result = MultDivYConq0(p1, cdr2[1], (p1->grd+1)/2, (p2->grd+1)/2);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(p2, cdr1[1], cdr2[0], NULL);
+    aux = MultDivYConq0(p2, cdr1[1], (p2->grd+1)/2, (p1->grd+1)/2);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(cdr2[1], cdr1[1], NULL, NULL);
+    aux = MultDivYConq0(cdr2[1], cdr1[1], (p2->grd+1)/2, (p1->grd+1)/2);
     result = sumarPolinomios(result, aux,1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
@@ -392,8 +389,8 @@ node *karatsuba(node *p1, node *p2){//Un sólo paso
   node *z2 = NULL;//a0(x)*b0(x)
   node *z3 = NULL;//a0(x)+b1(x)
   node *z4 = NULL;//a1(x)*b0(x)
-  splitPoly(p1, cdr1, NULL);
-  splitPoly(p2, cdr2, NULL);
+  splitPoly(p1, cdr1, p1->grd+1);
+  splitPoly(p2, cdr2, p2->grd+1);
   z1 = MultpPol(p1, p2, z1);
   z2 = MultpPol(cdr1[1], cdr2[1], z2);
   z3 = sumarPolinomios(z3, p1,1);
@@ -552,11 +549,24 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(2);
-  head1 = generator(2);
-  P = karatsuba(head2, head1);
+  head1 = generator(8192);
+  head2 = generator(8192);  /*
+  push(&head1, 1, 0);
+  push(&head1, 1, 1);
+  push(&head1, 1, 2);
+  push(&head1, 1, 3);
+  push(&head2, 1, 0);
+  push(&head2, 1, 1);
+  push(&head2, 1, 2);
+  push(&head2, 1, 3);
+  display(&head1);
+  display(&head2);*/
+  P = MultDivYConq(head1, head2);
   display(&P);
   P = eliminar(P);
+  //P = karatsuba(head1, head2);
+  //display(&P);
+  //P = eliminar(P);
   head2 = eliminar(head2);
   head1 = eliminar(head1);
   // menu(head1, head2);
