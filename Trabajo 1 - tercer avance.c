@@ -293,7 +293,7 @@ node *MultpPol(node *p1, node *p2, node *cdr) {
   }
 }
 
-void splitPoly(node *head, node*split[2], node *final) {
+void splitPoly(node *head, node*split[3], node *final) {
   node *cdr = NULL;
   node *aux = NULL;
   long largo;
@@ -304,21 +304,23 @@ void splitPoly(node *head, node*split[2], node *final) {
     largo = head->grd +1;//Si no hay grado final, es el grado mayor más uno
   cdr = head;
   corte = largo/2;
-  while (corte) {//Se avanza n/2 posiciones
-    aux = cdr;
+  while (cdr) {//Se avanza n/2 posiciones
+    if (corte == 1)
+      aux = cdr;
+    split[2] = cdr;
     cdr = cdr->next;
     corte--;
   }
   split[0] = aux;//Posición (n/2)-1
-  split[1] = cdr;//Posición n/2
+  split[1] = aux->next;//Posición n/2
   split[0]->next = NULL;
   return;
 }
 
 
 node *MultDivYConq0(node *p1, node *p2, node *p1final, node *p2final){
-  node *cdr1[2];
-  node *cdr2[2];
+  node *cdr1[3];
+  node *cdr2[3];
   node *aux = NULL;
   node *result = NULL;
   if (p1->next &&
@@ -326,13 +328,13 @@ node *MultDivYConq0(node *p1, node *p2, node *p1final, node *p2final){
     splitPoly(p1, cdr1, p1final);//p1 = A1(x) ; cdr1 = A0(x)*x^2
     splitPoly(p2, cdr2, p2final);//p2 = B1(x) ; cdr2 = B0(X)*x^2
     aux = MultDivYConq0(p1,p2,cdr1[0], cdr2[0]);
-    result = MultDivYConq0(p1, cdr2[1], cdr1[0], NULL);
+    result = MultDivYConq0(p1, cdr2[1], cdr1[0], cdr2[2]);
     result = sumarPolinomios(result, aux);
     aux = eliminar(aux);
-    aux = MultDivYConq0(p2, cdr1[1], cdr2[0], NULL);
+    aux = MultDivYConq0(p2, cdr1[1], cdr2[0], cdr1[2]);
     result = sumarPolinomios(result, aux);
     aux = eliminar(aux);
-    aux = MultDivYConq0(cdr2[1], cdr1[1], NULL, NULL);
+    aux = MultDivYConq0(cdr1[1], cdr2[1], cdr1[2], cdr2[2]);
     result = sumarPolinomios(result, aux);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
@@ -537,8 +539,8 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head2 = generator(5);
-  head1 = generator(5);
+  head2 = generator(10000);
+  head1 = generator(10000);
   P = MultDivYConq(head2, head1);
   display(&P);
   P = eliminar(P);
