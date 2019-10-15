@@ -21,11 +21,11 @@ void push(node **head, long coef, long grd) {
     Inserta el elemento al inicio de la linkedList.
   */
   node *nNode =
-    (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
+      (node *)malloc(sizeof(node)); // Crear nodo temporal y asignar memoria
   nNode->coef = coef;               // Asignar coef a coef
   nNode->grd = grd;                 // Asignar el grado
-  nNode->next = *head; // Apuntar a head
-  *head = nNode;       // Igualaron head al nodo temporal.
+  nNode->next = *head;              // Apuntar a head
+  *head = nNode;                    // Igualaron head al nodo temporal.
 }
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -149,50 +149,50 @@ node *sumarPolinomios(node *p1, node *p2, int suma) {
   aux2 = p2;
   aux3 = NULL;
   while (aux1 && aux2) {
-    if(aux1->grd == aux2->grd){
-      aux1->coef = ((long)aux1->coef + (long)aux2->coef*suma);
+    if (aux1->grd == aux2->grd) {
+      aux1->coef = ((long)aux1->coef + (long)aux2->coef * suma);
       aux3 = aux1;
       aux1 = aux1->next;
       aux2 = aux2->next;
-    }else{
-      if(aux1->grd > aux2->grd){
-	aux3 = aux1;
-	aux1 = aux1->next;
-      }else{
-	aux4 = (node *)malloc(sizeof(node));
-	aux4->coef = aux2->coef*suma;
-	aux4->grd = aux2->grd;
-	aux4->next = aux1;
-	if (aux3)
-	  aux3->next = aux4;
-	else{
-	  aux3 = aux4;
-	  p1 = aux4;
-	}
-	aux3 = aux4;
-	aux2 = aux2->next;
+    } else {
+      if (aux1->grd > aux2->grd) {
+        aux3 = aux1;
+        aux1 = aux1->next;
+      } else {
+        aux4 = (node *)malloc(sizeof(node));
+        aux4->coef = aux2->coef * suma;
+        aux4->grd = aux2->grd;
+        aux4->next = aux1;
+        if (aux3)
+          aux3->next = aux4;
+        else {
+          aux3 = aux4;
+          p1 = aux4;
+        }
+        aux3 = aux4;
+        aux2 = aux2->next;
       }
     }
   }
-  if(!aux1 && aux2){
-    if(!p1){
+  if (!aux1 && aux2) {
+    if (!p1) {
       aux4 = (node *)malloc(sizeof(node));
-      aux4->coef = aux2->coef*suma;
+      aux4->coef = aux2->coef * suma;
       aux4->grd = aux2->grd;
       aux4->next = NULL;
       p1 = aux4;
       aux3 = p1;
       aux2 = aux2->next;
     }
-    if(p1){
-      while(aux2){
-	aux4 = (node *)malloc(sizeof(node));
-	aux4->coef = aux2->coef*suma;
-	aux4->grd = aux2->grd;
-	aux4->next = NULL;
-	aux3->next = aux4;
-	aux3 = aux4;
-	aux2 = aux2->next;
+    if (p1) {
+      while (aux2) {
+        aux4 = (node *)malloc(sizeof(node));
+        aux4->coef = aux2->coef * suma;
+        aux4->grd = aux2->grd;
+        aux4->next = NULL;
+        aux3->next = aux4;
+        aux3 = aux4;
+        aux2 = aux2->next;
       }
     }
   }
@@ -242,10 +242,10 @@ node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
 
 node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   node *cP1 = NULL;
-  node * aux = NULL;
+  node *aux = NULL;
   node *rMult = NULL;
   cP1 = p1;
-  while(cP1){
+  while (cP1) {
     aux = CoefXPol(cP1->coef, cP1->grd, p2, aux);
     rMult = sumarPolinomios(rMult, aux, 1);
     aux = eliminar(aux);
@@ -253,7 +253,6 @@ node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   }
   return rMult;
 }
-
 
 node *MultpPol(node *p1, node *p2, node *cdr) {
   node *car = NULL;
@@ -293,85 +292,83 @@ node *MultpPol(node *p1, node *p2, node *cdr) {
   }
 }
 
-void splitPoly(node *head, node*split[2], long largo) {
+void splitPoly(node *head, node *split[2], long largo) {
   node *cdr = NULL;
   node *aux = NULL;
-  if(largo == 1){
+  if (largo == 1) {
     return;
   }
-  long corte = largo/2;
+  long corte = largo / 2;
   cdr = head;
-  while (corte && cdr) {//Se avanza n/2 posiciones
+  while (corte && cdr) { // Se avanza n/2 posiciones
     aux = cdr;
     cdr = cdr->next;
     corte--;
   }
-  split[0] = aux;//Posición (n/2)-1
-  split[1] = cdr;//Posición n/2
+  split[0] = aux; // Posición (n/2)-1
+  split[1] = cdr; // Posición n/2
   split[0]->next = NULL;
   return;
 }
 
-
-node *MultDivYConq0(node *p1, node *p2, long largo1, long largo2){
+node *MultDivYConq0(node *p1, node *p2, long largo1, long largo2) {
   node *cdr1[2];
   node *cdr2[2];
   node *aux = NULL;
   node *result = NULL;
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    splitPoly(p1, cdr1, largo1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
-    splitPoly(p2, cdr2, largo2);//p2 = B1(x) ; cdr2 = B0(X)*x^2
-    largo1 = largo1/2;
-    largo2 = largo2/2;
-    aux = MultDivYConq0(p1,p2,largo1,largo2);
+    splitPoly(p1, cdr1, largo1); // p1 = A1(x) ; cdr1 = A0(x)*x^2
+    splitPoly(p2, cdr2, largo2); // p2 = B1(x) ; cdr2 = B0(X)*x^2
+    largo1 = largo1 / 2;
+    largo2 = largo2 / 2;
+    aux = MultDivYConq0(p1, p2, largo1, largo2);
     result = MultDivYConq0(p1, cdr2[1], largo1, largo2);
-    result = sumarPolinomios(result, aux,1);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
     aux = MultDivYConq0(p2, cdr1[1], largo2, largo1);
-    result = sumarPolinomios(result, aux,1);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
     aux = MultDivYConq0(cdr1[1], cdr2[1], largo1, largo2);
-    result = sumarPolinomios(result, aux,1);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
     cdr2[0]->next = cdr2[1];
-  }else{
-    if(p1->next && !p2->next){
+  } else {
+    if (p1->next && !p2->next) {
       result = CoefXPol(p2->coef, p2->grd, p1, result);
-    }else{
+    } else {
       result = CoefXPol(p1->coef, p1->grd, p2, result);
     }
   }
   return result;
 }
 
-
-node *MultDivYConq(node *p1, node *p2){
+node *MultDivYConq(node *p1, node *p2) {
   node *cdr1[2];
   node *cdr2[2];
   node *aux = NULL;
   node *result = NULL;
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    splitPoly(p1, cdr1, p1->grd+1);//p1 = A1(x) ; cdr1 = A0(x)*x^2
-    splitPoly(p2, cdr2, p2->grd+1);//p2 = B1(x) ; cdr2 = B0(X)*x^2
-    aux = MultDivYConq0(p1,p2,(p1->grd+1)/2,(p2->grd+1)/2);
-    result = MultDivYConq0(p1, cdr2[1], (p1->grd+1)/2, (p2->grd+1)/2);
-    result = sumarPolinomios(result, aux,1);
+    splitPoly(p1, cdr1, p1->grd + 1); // p1 = A1(x) ; cdr1 = A0(x)*x^2
+    splitPoly(p2, cdr2, p2->grd + 1); // p2 = B1(x) ; cdr2 = B0(X)*x^2
+    aux = MultDivYConq0(p1, p2, (p1->grd + 1) / 2, (p2->grd + 1) / 2);
+    result = MultDivYConq0(p1, cdr2[1], (p1->grd + 1) / 2, (p2->grd + 1) / 2);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(p2, cdr1[1], (p2->grd+1)/2, (p1->grd+1)/2);
-    result = sumarPolinomios(result, aux,1);
+    aux = MultDivYConq0(p2, cdr1[1], (p2->grd + 1) / 2, (p1->grd + 1) / 2);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
-    aux = MultDivYConq0(cdr2[1], cdr1[1], (p2->grd+1)/2, (p1->grd+1)/2);
-    result = sumarPolinomios(result, aux,1);
+    aux = MultDivYConq0(cdr2[1], cdr1[1], (p2->grd + 1) / 2, (p1->grd + 1) / 2);
+    result = sumarPolinomios(result, aux, 1);
     aux = eliminar(aux);
     cdr1[0]->next = cdr1[1];
     cdr2[0]->next = cdr2[1];
-  }else{
-    if(p1->next){
+  } else {
+    if (p1->next) {
       result = CoefXPol(p2->coef, p2->grd, p1, result);
-    }else{
+    } else {
       result = CoefXPol(p1->coef, p1->grd, p2, result);
     }
   }
@@ -379,32 +376,45 @@ node *MultDivYConq(node *p1, node *p2){
 }
 
 
+node *split(node *P, long k, node *car){
+  int i=0;
+  long c=0;
+  node *aux1=NULL;
+  node *fN=NULL;
+  node *aux2=NULL;
+  c=((P->grd)+1)/2;
+  aux1=P;
+  for(i=0; i<k; i++){
+    if(i==0){
+      push(car, aux1->coef, aux1->grd-c);
+      aux2=car;
+    }else{
+      push(&aux2->next, aux1->coef, aux1->grd-c);
+      aux2=aux2->next;
+    }
+    aux1=aux1->next;
+  }
+  fN=aux1;
+  return fN;
+}
 
-node *karatsuba(node *p1, node *p2){//Un sólo paso
-  //A(x)*B(x)= (z1 + z2 + (z3 * z4 - z1 -z2))
+node *karatsuba0(node *p1, node *p2, node* finp1, node* finp2){
   node *result = NULL;
-  node *cdr1[3];//a1(x)||a0(x)
-  node *cdr2[3];//b1(x)||b0(x)
-  node *z1 = NULL;//a1(x)*b1(x)
-  node *z2 = NULL;//a0(x)*b0(x)
-  node *z3 = NULL;//a0(x)+b1(x)
-  node *z4 = NULL;//a1(x)*b0(x)
-  splitPoly(p1, cdr1, p1->grd+1);
-  splitPoly(p2, cdr2, p2->grd+1);
-  z1 = MultpPol(p1, p2, z1);
-  z2 = MultpPol(cdr1[1], cdr2[1], z2);
-  z3 = sumarPolinomios(z3, p1,1);
-  z3 = sumarPolinomios(z3, cdr2[1],1);
-  z4 = MultpPol(cdr1[1], p2, z4);
-  result = sumarPolinomios(result, z1,1);
-  result = sumarPolinomios(result, z2,1);
-  z3 = sumarPolinomios(z3, z4,1);
-  z3 = sumarPolinomios(z3, z1,-1);
-  z3 = sumarPolinomios(z3, z2,-1);
-  result = sumarPolinomios(result, z3, 1);
+  
   return result;
 }
 
+node *karatsuba(node *p1, node *p2) { // Un sólo paso
+  // A(x)*B(x)= (z1^(2^k) + z2 + (z3 * z4 - z1 -z2)^(2^k-1))
+  node *result = NULL;
+  node *cdr1[3];   // a1(x)||a0(x)
+  node *cdr2[3];   // b1(x)||b0(x)
+  node *z1 = NULL; // a1(x)*b1(x)
+  node *z2 = NULL; // a0(x)*b0(x)
+  node *z3 = NULL; // a0(x)+b1(x)
+  node *z4 = NULL; // a1(x)*b0(x)
+  return result;
+}
 
 // FunciÃ³n que despliega un menÃº para el usuario
 
@@ -462,7 +472,7 @@ void menu(node *head1, node *head2) {
     printf("\n-  "
            "-----------------------------------------------------------------"
            "-----\n\n");*/
-      head1 = sumarPolinomios(head1, head2,-1);
+      head1 = sumarPolinomios(head1, head2, -1);
       head2 = eliminar(head2);
       display(&head1);
       head1 = eliminar(head1);
@@ -549,8 +559,9 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head1 = generator(8192);
-  head2 = generator(8192);  /*
+  head1 = generator(16384);
+  head2 = generator(16384);
+/*
   push(&head1, 1, 0);
   push(&head1, 1, 1);
   push(&head1, 1, 2);
@@ -564,9 +575,9 @@ int main() {
   P = MultDivYConq(head1, head2);
   display(&P);
   P = eliminar(P);
-  //P = karatsuba(head1, head2);
-  //display(&P);
-  //P = eliminar(P);
+  // P = karatsuba(head1, head2);
+  // display(&P);
+  // P = eliminar(P);
   head2 = eliminar(head2);
   head1 = eliminar(head1);
   // menu(head1, head2);
