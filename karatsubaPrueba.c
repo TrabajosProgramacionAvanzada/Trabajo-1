@@ -98,7 +98,8 @@ node *generator(long grado) {
   return head; // Devolver la linkedList
 }
 
-node *sumarPolinomios(node *p1, node *p2) {
+// Funcion que suma dos polinomios
+node *sumarPolinomios(node *p1, node *p2, int suma) {
   node *aux1 = NULL;
   node *aux2 = NULL;
   node *aux3 = NULL;
@@ -108,7 +109,7 @@ node *sumarPolinomios(node *p1, node *p2) {
   aux3 = NULL;
   while (aux1 && aux2) {
     if (aux1->grd == aux2->grd) {
-      aux1->coef = ((long)aux1->coef + (long)aux2->coef);
+      aux1->coef = ((long)aux1->coef + (long)aux2->coef * suma);
       aux3 = aux1;
       aux1 = aux1->next;
       aux2 = aux2->next;
@@ -118,7 +119,7 @@ node *sumarPolinomios(node *p1, node *p2) {
         aux1 = aux1->next;
       } else {
         aux4 = (node *)malloc(sizeof(node));
-        aux4->coef = aux2->coef;
+        aux4->coef = aux2->coef * suma;
         aux4->grd = aux2->grd;
         aux4->next = aux1;
         if (aux3)
@@ -135,7 +136,7 @@ node *sumarPolinomios(node *p1, node *p2) {
   if (!aux1 && aux2) {
     if (!p1) {
       aux4 = (node *)malloc(sizeof(node));
-      aux4->coef = aux2->coef;
+      aux4->coef = aux2->coef * suma;
       aux4->grd = aux2->grd;
       aux4->next = NULL;
       p1 = aux4;
@@ -145,7 +146,7 @@ node *sumarPolinomios(node *p1, node *p2) {
     if (p1) {
       while (aux2) {
         aux4 = (node *)malloc(sizeof(node));
-        aux4->coef = aux2->coef;
+        aux4->coef = aux2->coef * suma;
         aux4->grd = aux2->grd;
         aux4->next = NULL;
         aux3->next = aux4;
@@ -157,83 +158,38 @@ node *sumarPolinomios(node *p1, node *p2) {
   return p1;
 }
 
-node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
-  node *aux = NULL;
-  node *auxP = NULL;
-  node *head = NULL;
-  auxP = p2;
-  if (cdr != NULL) { // Si cdr no está vacío se actualizan los valores
-    aux = cdr;
-    while (auxP != NULL && aux != NULL) {
-      aux->coef = aux->coef + auxP->coef * coef; // Actualizando
-      auxP = auxP->next;
-      aux = aux->next;
+node *polCoefC(long grd){
+  int i=0;
+  node *final=NULL;
+  for(i=0; i<=grd; i++){
+    push(&final, 0, i);
+  }
+  return final;
+}
+node *coefXPol(long coef, long grd, node *p, node *r){
+  node *auxr=r;
+  node *auxp=p;
+  while(auxp){
+    if(auxp->grd+grd==auxr->grd){
+      auxr->coef= auxr->coef+ auxp->coef * coef;
+      auxp=auxp->next;
+      auxr=auxr->next;
+    }else{
+      auxr=auxr->next;
     }
   }
-  if (cdr == NULL) { // Si aún quedan valores y cdr terminó, o cdr estaba vacío
-    while (auxP != NULL) {
-      if (head == NULL) { // Si no hay nodo anterior guardado
-        cdr = (node *)malloc(
-            sizeof(node)); // Se guarda el primer resultado en cdr como cabeza
-        cdr->coef = coef * auxP->coef;
-        cdr->grd = grd + auxP->grd;
-        cdr->next = NULL;
-        aux = cdr;  // Se copia para avanzar sin perder la cabeza
-        head = aux; // Se copia para mantener un respaldo del nodo anterior al
-                    // avanzar
-        aux = aux->next;
-        auxP = auxP->next;
-      } else {                              // De lo contrario
-        aux = (node *)malloc(sizeof(node)); // Se crea el nuevo resultado
-        aux->coef = coef * auxP->coef;
-        aux->grd = grd + auxP->grd;
-        aux->next = NULL;
-        head->next = aux; // Se dirige el nodo anterior al actual
-        head = aux;       // Se copia el nodo actual y se pasa al siguiente
-        aux = aux->next;
-        auxP = auxP->next;
-      }
-    }
-  }
-  return cdr;
+  return r;
 }
 
-node *MultpPol(node *p1, node *p2, node *cdr) {
-  node *car = NULL;
-  if (cdr == NULL) { // Si el resultado está vacío, es la primera iteración
-    car = (node *)malloc(sizeof(node)); // Se define y guarda el primer elemento
-    car->coef = p1->coef * p2->coef;
-    car->grd = p1->grd + p2->grd;
-    car->next = NULL;
-    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
-                    // termino del primer polinomio
-      car->next = CoefXPol(p1->coef, p1->grd, p2->next, car->next);
-    }
-    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
-                    // termino del segundo polinomio
-      car->next = CoefXPol(p2->coef, p2->grd, p1->next, cdr);
-    }
-    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
-      car->next = MultpPol(p1->next, p2, car->next);
-    }
-    return car; // Se devuelve el primer elemento
-  } else {      // De lo contrario//
-    cdr->coef =
-        cdr->coef +
-        (p1->coef * p2->coef); // Se actualiza el primer elemento del resutlado
-    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
-                    // termino del primer polinomio
-      cdr->next = CoefXPol(p1->coef, p1->grd, p2->next, cdr->next);
-    }
-    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
-                    // termino del segundo polinomio
-      cdr->next = CoefXPol(p1->coef, p1->grd, p1->next, cdr->next);
-    }
-    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
-      cdr->next = MultpPol(p1->next, p2, cdr->next);
-    }
-    return cdr; // Se devuelve el resultado
+node *RyC(node *p1, node *p2, node *r){
+  node *aux1=NULL;
+  aux1=p1;
+  while(aux1->next){
+    r=coefXPol(aux1->coef, aux1->grd, p2, r);
+    aux1=aux1->next;
   }
+  r=coefXPol(aux1->coef, aux1->grd, p2, r);
+  return r;
 }
 
 void splitPoly(node *head, node *split[2], long rango) {
@@ -245,16 +201,15 @@ void splitPoly(node *head, node *split[2], long rango) {
   corte = rango;
   while (corte) { // Se avanza n/2 posiciones
     if(!aux1){
-      push(&aux1, cdr->coef, cdr->grd - rango);
+      push(&aux1, cdr->coef, cdr->grd);
       split[0] = aux1;
     }else{
-      push(&aux1->next, cdr->coef, cdr->grd - rango);
+      push(&aux1->next, cdr->coef, cdr->grd);
       aux1 = aux1->next;
     }
     cdr = cdr->next;
     corte--;
   }
-  cdr = cdr->next;
   while (cdr) { // Se avanza n/2 posiciones
     if(!aux2){
       push(&aux2, cdr->coef, cdr->grd);
@@ -269,20 +224,6 @@ void splitPoly(node *head, node *split[2], long rango) {
   return;
 }
 
-node *diferencia(node *p1, node *p2) {
-  node *aux1 = p1;
-  node *aux2 = p2;
-  while (aux1 && aux2) {
-    if (aux1->grd == aux2->grd) {
-      aux1->coef = aux1->coef - aux2->coef;
-      aux1 = aux1->next;
-      aux2 = aux2->next;
-    } else if (aux1->grd > aux2->grd) {
-      aux1 = aux1->next;
-    }
-  }
-  return p1;
-}
 
 
 // FunciÃ³n que elimina de la memoria la lista que contiene al polinomio
@@ -297,40 +238,74 @@ node *eliminar(node *head) {
   return head; // Debe retornar NULL
 }
 
+node *MultDivYConq0(node *p1, node *p2, long n, node* result) {
+  node *cdr1[2];
+  node *cdr2[2];
+  node *aux = NULL;
+  long k = n/2;
+  long mayor = 0;
+  printf("\nentre!\n");
+  if(!result)
+    printf("\nno funciona!\n");
+  if (p1->next &&
+      p2->next) { // Si existen ambas continuaciones se sigue con la recursión
+    splitPoly(p1, cdr1, k); // cdr1[0] = A1(x) ; cdr1[1] = A0(x)
+    display(&cdr1[0]);
+    display(&cdr1[1]);
+    splitPoly(p2, cdr2, k); // cdr2[0] = B1(x) ; cdr2[1] = B0(X)
+    display(&cdr2[0]);
+    display(&cdr2[1]);
+    aux = MultDivYConq0(cdr1[0], cdr2[0], k, aux);
+    display(&result);
+    result = coefXPol( 1, n, aux, result);
+    display(&result);
+    if(cdr1[0]->grd + cdr2[1]->grd <= cdr1[1]->grd + cdr2[0]->grd){
+      mayor = cdr1[1]->grd + cdr2[0]->grd;
+    }else
+      mayor = cdr1[0]->grd + cdr2[1]->grd;
+		       result = coefXPol( 1, k, sumarPolinomios(MultDivYConq0(cdr1[0], cdr2[1], k, result), MultDivYConq0(cdr1[1], cdr2[0], k, result), 1), result);
+    display(&result);
+    result = sumarPolinomios(result, MultDivYConq0(cdr1[1], cdr2[1], k, result), 1);
+    display(&result);
+  } else {
+    if(p1->next){
+      printf("\np1 sigue\n");
+      result = coefXPol(p2->coef, p2->grd, p1, result);
+      display(&result);
+    }else{
+      printf("\np2 sigue o ambas no siguen\n");
+      if(!result)
+	printf("\nno funciona!\n");
+      result = coefXPol(p1->coef, p1->grd, p2, result);
+      display(&result);
+    }
+  }
+  return result;
+}
 
-node *karatsuba0(node *p1, node *p2, long l, node *final1, node *final2) {
-  long k = 0;
-  k = l / 2;
+node *MultDivYConq(node *p1, node *p2, long n1, long n2) {
   node *cdr1[2];
   node *cdr2[2];
   node *aux1 = NULL;
   node *aux2 = NULL;
-  node *c0 = NULL;
-  node *c1 = NULL;
-  node *c2 = NULL;
-  node *c3 = NULL;
-  node *c4 = NULL;
-  node *c5 = NULL;
-  node *result = NULL;
-  if (p1->next && p2->next) {
-    splitPoly(p1, cdr1, k);
-    splitPoly(p2, cdr2, k);
-    c0 = karatsuba0(p1, p2, k, cdr1[0], cdr2[0]);     // ax1*bx1
-    c1 = karatsuba0(cdr1[1], cdr2[1], k, aux1, aux2); // ax0*bx0
-    c2 = sumarPolinomios(c2, cdr1[1]);
-    c3 = sumarPolinomios(p2, cdr2[1]);
-    c4 = karatsuba0(c2, c3, k, cdr1[0], cdr2[0]);
-    c5 = diferencia(c4, diferencia(c0, c1));
-    cdr1[0]->next = cdr1[1];
-    cdr2[0]->next = cdr2[1];
-    result = sumarPolinomios(
-        sumarPolinomios(c0, CoefXPol(1, (p1->grd + 1) / 2, c5, NULL)),
-        CoefXPol(1, (p1->grd + 1) / 2, c1, NULL));
-    return result;
-  } else {
-    return MultpPol(p1, p2, NULL);
+  node *aux3 = NULL;
+  node *result = polCoefC(p1->grd + p2->grd);
+  long mayor = 0;
+  if (p1->next &&
+      p2->next) { // Si existen ambas continuaciones se sigue con la recursión
+    splitPoly(p1, cdr1, n1/2);
+    splitPoly(p2, cdr2, n2/2);
+    result = RyC(cdr1[0], cdr2[0], result);
+    result = RyC(cdr1[0], cdr2[1], result);
+    result = RyC(cdr1[1], cdr2[0], result);
+    result =RyC(cdr1[1], cdr2[1], result);
+    
+  return result;
+  }else{
+    result = RyC(p1, p2, result);
   }
 }
+
 
 node *karatsuba(node *p1, node *p2, long l) {
   long k = 0;
@@ -339,23 +314,36 @@ node *karatsuba(node *p1, node *p2, long l) {
   node *cdr2[2];
   node *aux1 = NULL;
   node *aux2 = NULL;
-  node *c0 = NULL;
   node *c1 = NULL;
   node *c2 = NULL;
   node *c3 = NULL;
   node *c4 = NULL;
   node *c5 = NULL;
-  node *result = NULL;
+  node *result = polCoefC(p1->grd + p2->grd);
   if(p1->next && p2->next){
-    splitPoly(p1, cdr1, k);
-    splitPoly(p2, cdr2, k);
-    c0 = MultpPol(cdr1[0], cdr2[0], NULL);
-    c1 = MultpPol(cdr1[1], cdr2[1], NULL);
-    c2 = CoefXPol(1, k, diferencia(MultpPol(sumarPolinomios(cdr1[0], cdr1[1]), sumarPolinomios(cdr2[0], cdr2[1]), NULL), sumarPolinomios(sumarPolinomios(NULL, c0), c1)), NULL);
-    result = sumarPolinomios(CoefXPol(1, k*2, c0, NULL), sumarPolinomios(c1, c2));
+    splitPoly(p1, cdr1, k);//A(x)1*X^(2^(k-1)) && A(x)0
+    splitPoly(p2, cdr2, k);//B(x)1*X^(2^(k-1)) && B(x)0
+    c1 = polCoefC(cdr1[0]->grd + cdr2[0]->grd);
+    c1 = RyC(cdr1[0], cdr2[0], c1);//(A(x)1*B(x)1)
+    c2 = polCoefC(cdr1[1]->grd + cdr2[1]->grd);
+    c2 = RyC(cdr1[1], cdr2[1], c2);//(A(x)0*B(x)0)
+    c3 = sumarPolinomios(c3, cdr1[0],1);//A(x)1
+    c3 = sumarPolinomios(c3, cdr1[1],1);//(A(x)1 + A(x)0)
+    c4 = sumarPolinomios(c4, cdr2[0],1);//B(x)1
+    c4 = sumarPolinomios(c4, cdr2[1],1);//(B(x)1 + B(x)0)
+    c5 = polCoefC(c3->grd + c4->grd);
+    c5 = RyC(c3, c4, c5);//(c3 * c4)
+    c5 = sumarPolinomios(c5, cdr1[0], -1);//(c5 - c1)
+    c5 = sumarPolinomios(c5, cdr2[0], -1);//(c5 - c2)
+    result = sumarPolinomios(result, c5, 1);//c5*X^(2^(k-1))
+    result = sumarPolinomios(result, c1, 1);//(c5 + (c1 * x^(2^k)))
     return result;
   }else{
-    return MultpPol(p1, p2, NULL);
+    if (p1->next){
+      return coefXPol(p2->coef, p2->grd, p1, result);
+    }else{
+      return coefXPol(p1->coef, p1->grd, p2, result);
+    }
   }
 }
 
@@ -363,23 +351,23 @@ int main() {
   node *P1 = NULL;
   node *P2 = NULL;
   node *P3 = NULL;
-  node *car1 = NULL;
-  node *cdr1 = NULL;
-  node *car2 = NULL;
-  node *cdr2 = NULL;
-  long f = 3;
-  P1 = generator(f);
-  P2 = generator(f);
-  P3 = karatsuba(P1, P2, f);
+  long f = 4;
+  //  P1 = generator(f);
+  //P2 = generator(f);
+  push(&P1, 1, 0);
+  push(&P1, 1, 1);
+  push(&P1, 1, 2);
+  push(&P1, 1, 3);
+  push(&P1, 1, 4);
+  push(&P2, 1, 0);
+  push(&P2, 1, 1);
+  push(&P2, 1, 2);
+  push(&P2, 1, 3);
+  push(&P2, 1, 4);
+  P3 = karatsuba(P1, P2, P1->grd+1);
   display(&P3);
   P3 = eliminar(P3);
-  if(P3)
-    printf("NO FUNCIONA");
-  else{
-    display(&P1);
-    display(&P2);
-  }
-  P3 = MultpPol(P1, P2, P3);
-  display(&P3);
+  /*P3 = polCoefC(P1->grd + P2->grd);
+    P3 = RyC(P1, P2, P3);*/
   return 0;
 }

@@ -199,98 +199,56 @@ node *sumarPolinomios(node *p1, node *p2, int suma) {
   return p1;
 }
 
-node *CoefXPol(long coef, long grd, node *p2, node *cdr) {
-  node *aux = NULL;
-  node *auxP = NULL;
-  node *head = NULL;
-  auxP = p2;
-  if (cdr != NULL) { // Si cdr no está vacío se actualizan los valores
-    aux = cdr;
-    while (auxP != NULL && aux != NULL) {
-      aux->coef = aux->coef + auxP->coef * coef; // Actualizando
-      auxP = auxP->next;
-      aux = aux->next;
-    }
+
+node *polCoefC(long grd){
+  int i=0;
+  node *final=NULL;
+  for(i=0; i<=grd; i++){
+    push(&final, 0, i);
   }
-  if (cdr == NULL) { // Si aún quedan valores y cdr terminó, o cdr estaba vacío
-    while (auxP != NULL) {
-      if (head == NULL) { // Si no hay nodo anterior guardado
-        cdr = (node *)malloc(
-            sizeof(node)); // Se guarda el primer resultado en cdr como cabeza
-        cdr->coef = coef * auxP->coef;
-        cdr->grd = grd + auxP->grd;
-        cdr->next = NULL;
-        aux = cdr;  // Se copia para avanzar sin perder la cabeza
-        head = aux; // Se copia para mantener un respaldo del nodo anterior al
-                    // avanzar
-        aux = aux->next;
-        auxP = auxP->next;
-      } else {                              // De lo contrario
-        aux = (node *)malloc(sizeof(node)); // Se crea el nuevo resultado
-        aux->coef = coef * auxP->coef;
-        aux->grd = grd + auxP->grd;
-        aux->next = NULL;
-        head->next = aux; // Se dirige el nodo anterior al actual
-        head = aux;       // Se copia el nodo actual y se pasa al siguiente
-        aux = aux->next;
-        auxP = auxP->next;
+  return final;
+}
+
+node *coefXPol(long coef, long grd, node *p, node *r){
+  node *auxr=r;
+  node *auxp=p;
+  while(auxp){
+    if(auxp->grd+grd==auxr->grd){
+      auxr->coef= auxr->coef+ auxp->coef * coef;
+      auxp=auxp->next;
+      auxr=auxr->next;
+    }else{
+      while(auxp->grd+grd!=auxr->grd){
+	auxr=auxr->next;
       }
     }
   }
-  return cdr;
+  return r;
+}
+
+node *RyC(node *p1, node *p2, node *r){
+  node *aux1=NULL;
+  aux1=p1;
+  while(aux1->next){
+    r=coefXPol(aux1->coef, aux1->grd, p2, r);
+    aux1=aux1->next;
+  }
+  r=coefXPol(aux1->coef, aux1->grd, p2, r);
+  return r;
 }
 
 node *multiplicarPolinomioFBrut(node *p1, node *p2) { // Función a fuerza bruta
   node *cP1 = NULL;
   node *aux = NULL;
-  node *rMult = NULL;
   cP1 = p1;
+  aux = polCoefC(p1->grd + p2->grd);
   while (cP1) {
-    aux = CoefXPol(cP1->coef, cP1->grd, p2, aux);
-    rMult = sumarPolinomios(rMult, aux, 1);
-    aux = eliminar(aux);
+    aux = coefXPol(cP1->coef, cP1->grd, p2, aux);
     cP1 = cP1->next;
   }
-  return rMult;
+  return aux;
 }
 
-node *MultpPol(node *p1, node *p2, node *cdr) {
-  node *car = NULL;
-  if (cdr == NULL) { // Si el resultado está vacío, es la primera iteración
-    car = (node *)malloc(sizeof(node)); // Se define y guarda el primer elemento
-    car->coef = p1->coef * p2->coef;
-    car->grd = p1->grd + p2->grd;
-    car->next = NULL;
-    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
-                    // termino del primer polinomio
-      car->next = CoefXPol(p1->coef, p1->grd, p2->next, car->next);
-    }
-    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
-                    // termino del segundo polinomio
-      car->next = CoefXPol(p2->coef, p2->grd, p1->next, cdr);
-    }
-    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
-      car->next = MultpPol(p1->next, p2, car->next);
-    }
-    return car; // Se devuelve el primer elemento
-  } else {      // De lo contrario//
-    cdr->coef =
-        cdr->coef +
-        (p1->coef * p2->coef); // Se actualiza el primer elemento del resutlado
-    if (p2->next) { // Si el polinomio 2 sigue, se multiplica por el primer
-                    // termino del primer polinomio
-      cdr->next = CoefXPol(p1->coef, p1->grd, p2->next, cdr->next);
-    }
-    if (p1->next) { // Si el polinomio 1 sigue, se multiplica por el primer
-                    // termino del segundo polinomio
-      cdr->next = CoefXPol(p1->coef, p1->grd, p1->next, cdr->next);
-    }
-    if (p1->next && p2->next) { // Si ambos continuan sigue la recurción
-      cdr->next = MultpPol(p1->next, p2, cdr->next);
-    }
-    return cdr; // Se devuelve el resultado
-  }
-}
 
 void splitPoly(node *head, node *split[2], long largo) {
   node *cdr = NULL;
@@ -315,7 +273,7 @@ node *MultDivYConq0(node *p1, node *p2, long largo1, long largo2) {
   node *cdr1[2];
   node *cdr2[2];
   node *aux = NULL;
-  node *result = NULL;
+  node *result = polCoefC(p1->grd + p2->grd);
   if (p1->next &&
       p2->next) { // Si existen ambas continuaciones se sigue con la recursión
     splitPoly(p1, cdr1, largo1); // p1 = A1(x) ; cdr1 = A0(x)*x^2
@@ -336,9 +294,9 @@ node *MultDivYConq0(node *p1, node *p2, long largo1, long largo2) {
     cdr2[0]->next = cdr2[1];
   } else {
     if (p1->next && !p2->next) {
-      result = CoefXPol(p2->coef, p2->grd, p1, result);
+      result = coefXPol(p2->coef, p2->grd, p1, result);
     } else {
-      result = CoefXPol(p1->coef, p1->grd, p2, result);
+      result = coefXPol(p1->coef, p1->grd, p2, result);
     }
   }
   return result;
@@ -367,35 +325,45 @@ node *MultDivYConq(node *p1, node *p2) {
     cdr2[0]->next = cdr2[1];
   } else {
     if (p1->next) {
-      result = CoefXPol(p2->coef, p2->grd, p1, result);
+      result = coefXPol(p2->coef, p2->grd, p1, result);
     } else {
-      result = CoefXPol(p1->coef, p1->grd, p2, result);
+      result = coefXPol(p1->coef, p1->grd, p2, result);
     }
   }
   return result;
 }
 
 
-node *split(node *P, long k, node *car){
-  int i=0;
-  long c=0;
-  node *aux1=NULL;
-  node *fN=NULL;
-  node *aux2=NULL;
-  c=((P->grd)+1)/2;
-  aux1=P;
-  for(i=0; i<k; i++){
-    if(i==0){
-      push(car, aux1->coef, aux1->grd-c);
-      aux2=car;
+void splitK(node *head, node *split[2], long rango) {
+  node *cdr = NULL;
+  node *aux1 = NULL;
+  node *aux2 = NULL;
+  long corte;
+  cdr = head;
+  corte = rango;
+  while (corte) { // Se avanza n/2 posiciones
+    if(!aux1){
+      push(&aux1, cdr->coef, cdr->grd - rango);
+      split[0] = aux1;
     }else{
-      push(&aux2->next, aux1->coef, aux1->grd-c);
-      aux2=aux2->next;
+      push(&aux1->next, cdr->coef, cdr->grd - rango);
+      aux1 = aux1->next;
     }
-    aux1=aux1->next;
+    cdr = cdr->next;
+    corte--;
   }
-  fN=aux1;
-  return fN;
+  while (cdr) { // Se avanza n/2 posiciones
+    if(!aux2){
+      push(&aux2, cdr->coef, cdr->grd);
+      split[1] = aux2;
+    }else{
+      push(&aux2->next, cdr->coef, cdr->grd);
+      aux2 = aux2->next;
+    }
+    cdr = cdr->next;
+    corte--;
+  }
+  return;
 }
 
 node *karatsuba0(node *p1, node *p2, node* finp1, node* finp2){
@@ -509,7 +477,8 @@ void menu(node *head1, node *head2) {
       // printf("\nx  "
       //     "-----------------------------------------------------------------"
       //   "-----\n\n");
-      aux = MultpPol(head1, head2, aux);
+      aux = polCoefC(head1->grd + head2->grd);
+      aux = RyC(head1, head2,aux);
       display(&aux);
       head1 = eliminar(head1);
       head2 = eliminar(head2);
@@ -559,9 +528,9 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head1 = generator(16384);
-  head2 = generator(16384);
-/*
+  //head1 = generator(8);
+  //head2 = generator(8);
+  /*
   push(&head1, 1, 0);
   push(&head1, 1, 1);
   push(&head1, 1, 2);
@@ -569,9 +538,9 @@ int main() {
   push(&head2, 1, 0);
   push(&head2, 1, 1);
   push(&head2, 1, 2);
-  push(&head2, 1, 3);
+  push(&head2, 1, 3);*/
   display(&head1);
-  display(&head2);*/
+  display(&head2);
   P = MultDivYConq(head1, head2);
   display(&P);
   P = eliminar(P);
