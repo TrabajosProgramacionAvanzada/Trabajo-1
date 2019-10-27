@@ -61,6 +61,7 @@ void display(node **head) {
   printf("\n");
 }
 
+
 long coefGenerator(long lsup) {
   /*
     Funcion que genera un coeficiente dentro del limite superior. Para
@@ -161,8 +162,8 @@ node *sumarPolinomios(node *p1, node *p2, int suma) {
 node *polCoefC(long grd){
   int i=0;
   node *final=NULL;
-  for(i=0; i<=grd; i++){
-    push(&final, 0, i);
+  for(i=0; i<= grd; i++){
+    push(&final,0, i);
   }
   return final;
 }
@@ -306,6 +307,38 @@ node *MultDivYConq(node *p1, node *p2, long n1, long n2) {
   }
 }
 
+void splitPolyK(node *head, node *split[2], long rango) {
+  node *cdr = NULL;
+  node *aux1 = NULL;
+  node *aux2 = NULL;
+  long corte;
+  cdr = head;
+  corte = rango;
+  while (corte) { // Se avanza n/2 posiciones
+    if(!aux1){
+      push(&aux1, cdr->coef, cdr->grd- rango);
+      split[0] = aux1;
+    }else{
+      push(&aux1->next, cdr->coef, cdr->grd - rango);
+      aux1 = aux1->next;
+    }
+    cdr = cdr->next;
+    corte--;
+  }
+  while (cdr) { // Se avanza n/2 posiciones
+    if(!aux2){
+      push(&aux2, cdr->coef, cdr->grd);
+      split[1] = aux2;
+    }else{
+      push(&aux2->next, cdr->coef, cdr->grd);
+      aux2 = aux2->next;
+    }
+    cdr = cdr->next;
+    corte--;
+  }
+  return;
+}
+
 
 node *karatsuba(node *p1, node *p2, long l) {
   long k = 0;
@@ -318,32 +351,30 @@ node *karatsuba(node *p1, node *p2, long l) {
   node *c2 = NULL;
   node *c3 = NULL;
   node *c4 = NULL;
-  node *c5 = NULL;
-  node *result = polCoefC(p1->grd + p2->grd);
+  node *result = polCoefC(p1->grd + p2->grd - 1);
   if(p1->next && p2->next){
-    splitPoly(p1, cdr1, k);//A(x)1*X^(2^(k-1)) && A(x)0
-    splitPoly(p2, cdr2, k);//B(x)1*X^(2^(k-1)) && B(x)0
+    splitPolyK(p1, cdr1, k);//A(x)1*X^(2^(k-1)) && A(x)0
+    splitPolyK(p2, cdr2, k);//B(x)1*X^(2^(k-1)) && B(x)0
     c1 = polCoefC(cdr1[0]->grd + cdr2[0]->grd);
-    c1 = RyC(cdr1[0], cdr2[0], c1);//(A(x)1*B(x)1)
-    c2 = polCoefC(cdr1[1]->grd + cdr2[1]->grd);
-    c2 = RyC(cdr1[1], cdr2[1], c2);//(A(x)0*B(x)0)
-    c3 = sumarPolinomios(c3, cdr1[0],1);//A(x)1
-    c3 = sumarPolinomios(c3, cdr1[1],1);//(A(x)1 + A(x)0)
-    c4 = sumarPolinomios(c4, cdr2[0],1);//B(x)1
-    c4 = sumarPolinomios(c4, cdr2[1],1);//(B(x)1 + B(x)0)
-    c5 = polCoefC(c3->grd + c4->grd);
-    c5 = RyC(c3, c4, c5);//(c3 * c4)
-    c5 = sumarPolinomios(c5, cdr1[0], -1);//(c5 - c1)
-    c5 = sumarPolinomios(c5, cdr2[0], -1);//(c5 - c2)
-    result = sumarPolinomios(result, c5, 1);//c5*X^(2^(k-1))
-    result = sumarPolinomios(result, c1, 1);//(c5 + (c1 * x^(2^k)))
+    c1 = RyC(cdr1[0], cdr2[0], c1);
+    c2 = sumarPolinomios(c2, cdr1[0],1);
+    c2 = sumarPolinomios(c2, cdr1[1],1);
+    c3 = sumarPolinomios(c3, cdr2[0],1);
+    c3 = sumarPolinomios(c3, cdr2[1],1);
+    c4 = polCoefC(c2->grd + c3->grd);
+    c4 = RyC(c2, c3, c4);
+    result = RyC(cdr1[1], cdr2[1], result);
+    c4 = sumarPolinomios(c4, c1, -1);
+    c4 = sumarPolinomios(c4, result, -1);
+    aux1 = polCoefC(l + c1->grd);
+    aux1 = coefXPol(1, l, c1, aux1);
+    aux2 = polCoefC(k  + c4->grd);
+    aux2 = coefXPol(1, k, c4, aux2);
+    result = sumarPolinomios(result, aux1, 1);
+    result = sumarPolinomios(result, aux2, 1);
     return result;
   }else{
-    if (p1->next){
-      return coefXPol(p2->coef, p2->grd, p1, result);
-    }else{
-      return coefXPol(p1->coef, p1->grd, p2, result);
-    }
+    return RyC(p1, p2, result);
   }
 }
 
@@ -351,23 +382,20 @@ int main() {
   node *P1 = NULL;
   node *P2 = NULL;
   node *P3 = NULL;
-  long f = 4;
-  //  P1 = generator(f);
-  //P2 = generator(f);
+  long f = 16384;
+  P1 = generator(f);
+  P2 = generator(f);/*
   push(&P1, 1, 0);
   push(&P1, 1, 1);
   push(&P1, 1, 2);
   push(&P1, 1, 3);
-  push(&P1, 1, 4);
   push(&P2, 1, 0);
   push(&P2, 1, 1);
   push(&P2, 1, 2);
-  push(&P2, 1, 3);
-  push(&P2, 1, 4);
-  P3 = karatsuba(P1, P2, P1->grd+1);
-  display(&P3);
+  push(&P2, 1, 3);*/
+  P3 = karatsuba(P1, P2, f);
+  //printf("\nkaratsuba:\n");
+  //display(&P3);
   P3 = eliminar(P3);
-  /*P3 = polCoefC(P1->grd + P2->grd);
-    P3 = RyC(P1, P2, P3);*/
   return 0;
 }
