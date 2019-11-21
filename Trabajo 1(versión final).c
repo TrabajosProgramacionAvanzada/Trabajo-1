@@ -659,35 +659,42 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  head1 = generator(1000);
-  head2 = generator(1000);
-  double t = clock();
+  int f = 38040;
+  double t = 0.0;
+  FILE *fuerza = fopen("dividiryconquistar.csv", "a");
+  // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
+  fclose(fuerza);
+  while(t <= 22){
+  head1 = generator(f);
+  head2 = generator(f);
+  t = clock();
+  P = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
+  t = clock() - t;
+  t = t / CLOCKS_PER_SEC;
+  fuerza = fopen("dividiryconquistar.csv", "a");
+  printf("%ld,%f\n", f, t);
+  fprintf(fuerza , "%ld,%f\n", f, t);
+  fclose(fuerza);
+  P = eliminar(P);
+  f = f + 10;
+  }/*
   P = karatsuba(head1, head2, head1->grd+1, head2->grd+1);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
   printf("\ntiempo karatsuba: %f", t);
   P = eliminar(P);
   t = clock();
-  P = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
   printf("\ntiempo Dividir y conquistar: %f", t);
   P = eliminar(P);
   t = clock();
-  P = polCoefC(head1->grd + head2->grd);
-  P = RyC(head1, head2, P);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
   printf("\ntiempo Reducir y conquistar: %f", t);
   P = eliminar(P);
-  t = clock();
-  P = multiplicarPolinomioFBrut(head1, head2);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo Fuerza Bruta: %f", t);
-  P = eliminar(P);
   head1 = eliminar(head1);
   head2 = eliminar(head2);
-  //menu(head1, head2);
+  //menu(head1, head2);*/
   return 0;
 }

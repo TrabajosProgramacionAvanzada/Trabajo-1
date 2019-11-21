@@ -454,8 +454,8 @@ int main() {
   node *P2 = NULL;
   node *P3 = NULL;
   long f = 4;
-  P1 = generator(16384);
-  P2 = generator(16384);/*
+  P1 = generator(16385);
+  P2 = generator(16385);/*
   push(&P1, 1, 0);
   push(&P1, 1, 1);
   push(&P1, 1, 2);
