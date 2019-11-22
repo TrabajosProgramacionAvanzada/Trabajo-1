@@ -659,19 +659,19 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  int f = 38040;
+  int f = 35240;
   double t = 0.0;
-  FILE *fuerza = fopen("dividiryconquistar.csv", "a");
+  FILE *fuerza = fopen("clasica.csv", "a");
   // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
   fclose(fuerza);
   while(t <= 22){
   head1 = generator(f);
   head2 = generator(f);
   t = clock();
-  P = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
+  P = multiplicarPolinomioFBrut(head1, head2);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
-  fuerza = fopen("dividiryconquistar.csv", "a");
+  fuerza = fopen("clasica.csv", "a");
   printf("%ld,%f\n", f, t);
   fprintf(fuerza , "%ld,%f\n", f, t);
   fclose(fuerza);
