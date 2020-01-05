@@ -461,7 +461,7 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
       c3 = RyC(aux4[0], aux3[1], c2);
       result = karatsuba0(aux3[1], aux4[1], (aux3[1]->grd + 1), result);//la multiplicación entre las partes potencias de dos se pasan por karatsuba
       result = sumarPolinomios(result, sumarPolinomios(c3, sumarPolinomios(c2, c1, 1), 1), 1); //result + (c3 + (c2 + c1)) y luego se suman todos los resultados
-      return result;
+      return elimSobrantes(result);
     }
   }
   k = l / 2;
@@ -542,7 +542,7 @@ int main() {
   node *P1 = NULL;
   node *P2 = NULL;
   node *P3 = NULL;
-  long f = 262144;
+  long f = 10;
   double t = 0;
   P1 = generator(f);
   P2 = generator(f); /*
@@ -560,7 +560,7 @@ int main() {
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
   printf("\ntiempo Karatsuba: %f\n", t);
-  //display(&P3);
+  display(&P3);
   P3 = eliminar(P3);
   t = clock();
   P3 = polCoefC(P1->grd + P2->grd);

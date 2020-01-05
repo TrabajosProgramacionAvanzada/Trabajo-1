@@ -367,8 +367,8 @@ node *elimSobrantes(node *p) {
   return aux;
 }
 
-node *karatsuba0(node *p1, node *p2,
-                 long l) { // Paso inductivo (recursivo) de karatsuba
+node *karatsuba0(node *p1, node *p2, long l,
+                 node *result) { // Paso inductivo (recursivo) de karatsuba
   long k = 0;
   k = l / 2;
   node *cdr1[2];
@@ -379,17 +379,18 @@ node *karatsuba0(node *p1, node *p2,
   node *c2 = NULL;
   node *c3 = NULL;
   node *c4 = NULL;
-  node *result = polCoefC(p1->grd + p2->grd);
   if (p1->next && p2->next) {
-    splitPolyK(p1, cdr1, k);              // A(x)1*X^(2^(k-1)) && A(x)0
-    splitPolyK(p2, cdr2, k);              // B(x)1*X^(2^(k-1)) && B(x)0
-    c1 = karatsuba0(cdr1[0], cdr2[0], k); //(A(x)1 * B(x)1)
+    splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
+    splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
+    c1 = polCoefC(k);
+    c1 = karatsuba0(cdr1[0], cdr2[0], k, c1); //(A(x)1 * B(x)1)
     c2 = sumarPolinomios(c2, cdr1[0], 1);
     c2 = sumarPolinomios(c2, cdr1[1], 1);
     c3 = sumarPolinomios(c3, cdr2[0], 1);
     c3 = sumarPolinomios(c3, cdr2[1], 1);
-    c4 = karatsuba0(c2, c3, k); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
-    result = karatsuba0(cdr1[1], cdr2[1], k); //(A(x)0 * B(x)0)
+    c4 = polCoefC(k);
+    c4 = karatsuba0(c2, c3, k, c4); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
+    result = karatsuba0(cdr1[1], cdr2[1], k, result); //(A(x)0 * B(x)0)
     c4 = sumarPolinomios(c4, c1, -1);
     c4 = sumarPolinomios(c4, result, -1); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0)) -
                                           //(A(x)1 * B(x)1) - (A(x)0 * B(x)0)
@@ -399,14 +400,37 @@ node *karatsuba0(node *p1, node *p2,
     aux2 = coefXPol(1, k, c4, aux2); // c4^(2^(k-1))
     result = sumarPolinomios(result, aux1, 1);
     result = sumarPolinomios(result, aux2, 1);
+    c1 = eliminar(c1);
+    c2 = eliminar(c2);
+    c3 = eliminar(c3);
+    c4 = eliminar(c4);
+    aux1 = eliminar(aux1);
+    aux2 = eliminar(aux2);
+    cdr1[0] = eliminar(cdr1[0]);
+    cdr1[1] = eliminar(cdr1[1]);
+    cdr2[0] = eliminar(cdr2[0]);
+    cdr2[1] = eliminar(cdr2[1]);
     return result;
   } else {
     return RyC(p1, p2, result);
   }
 }
 
-node *karatsuba(node *p1, node *p2, long l1,
-                long l2) { // Primer paso de karatsuba
+void cutin(node *cut[2], long long int rango){//Corta un polinomio en dos partes tales que la primera tenga n términos
+  long long int c = rango;
+  node *aux = NULL;
+  cut[0] = cut[1];
+  while(c != 0 && cut[1]){//avanza n posiciones
+    aux = cut[1];
+    cut[1] = cut[1]->next;
+    c--;
+  }
+  aux->next = NULL;//corta el enlaze entre el último término de cut[0] con el primero de cut[1]
+  return;
+}
+
+node *karatsuba(node *p1, node *p2, long l1, long l2,
+                int def) { // Primer paso de karatsuba
   long k = 0;
   long l = 0;
   long pow2[25] = {1,       2,       4,       8,       16,     32,     64,
@@ -417,11 +441,13 @@ node *karatsuba(node *p1, node *p2, long l1,
   node *cdr2[2];
   node *aux1 = NULL;
   node *aux2 = NULL;
+  node *aux3[2];
+  node *aux4[2];
   node *c1 = NULL;
   node *c2 = NULL;
   node *c3 = NULL;
   node *c4 = NULL;
-  node *result = polCoefC(p1->grd + p2->grd - 1);
+  node *result = polCoefC(p1->grd + p2->grd);
   if (l1 < l2) {
     p1 = complete(p1, l2 - l1);
   } else if (l1 > l2) {
@@ -429,24 +455,39 @@ node *karatsuba(node *p1, node *p2, long l1,
   }
   l = p1->grd + 1;
   for (k = 0; k < 24; k++) {
-    if (p1->grd + 1 > pow2[k] && p1->grd + 1 < pow2[k + 1]) {
-      p1 = complete(p1, (pow2[k + 1] - (p1->grd + 1)));
-      p2 = complete(p2, (pow2[k + 1] - (p2->grd + 1)));
-      l = pow2[k + 1];
-      break;
+    if (p1->grd + 1 > pow2[k] && p1->grd + 1 < pow2[k + 1]) {//Caso en el que el largo de uno de los polinomios no sea una potencia de dos
+      aux3[1] = p1;
+      aux4[1] = p2;
+      cutin(aux3, p1->grd + 1 - pow2[k]);//Corto lo que excede a la potencia de dos más grande que sea menor al grado mayor del polinomio
+      cutin(aux4, p2->grd + 1 - pow2[k]);//en ambos polinomios queda aux3/4[0] = resto, aux3/4[1] = potencia de 2 mayor que "cabe" en el tamaño
+      c1 = polCoefC(aux3[0]->grd + aux4[0]->grd);//el resto se multiplica entre sí con reducir y conquistar
+      c1 = RyC(aux3[0], aux4[0], c1);
+      c2 = polCoefC(aux3[0]->grd + aux4[1]->grd);//Así como entre el resto y el largo potencia de dos
+      c2 = RyC(aux3[0], aux4[1], c2);
+      c3 = polCoefC(aux3[1]->grd + aux4[0]->grd);
+      c3 = RyC(aux4[0], aux3[1], c2);
+      result = karatsuba0(aux3[1], aux4[1], (aux3[1]->grd + 1), result);//la multiplicación entre las partes potencias de dos se pasan por karatsuba
+      result = sumarPolinomios(result, sumarPolinomios(c3, sumarPolinomios(c2, c1, 1), 1), 1); //result + (c3 + (c2 + c1)) y luego se suman todos los resultados
+      c1 = eliminar(c1);
+      c2 = eliminar(c2);
+      c3 = eliminar(c3);
+      return elimSobrantes(result);
     }
   }
   k = l / 2;
-  if (p1->next && p2->next) {
-    splitPolyK(p1, cdr1, k);              // A(x)1*X^(2^(k-1)) && A(x)0
-    splitPolyK(p2, cdr2, k);              // B(x)1*X^(2^(k-1)) && B(x)0
-    c1 = karatsuba0(cdr1[0], cdr2[0], k); //(A(x)1 * B(x)1)
+  if (p1->next && p2->next &&
+      def != 0) {            // Caso para el paso inductivo de Karatsuba
+    splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
+    splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
+    c1 = polCoefC(k);
+    c1 = karatsuba0(cdr1[0], cdr2[0], k, c1); //(A(x)1 * B(x)1)
     c2 = sumarPolinomios(c2, cdr1[0], 1);
     c2 = sumarPolinomios(c2, cdr1[1], 1);
     c3 = sumarPolinomios(c3, cdr2[0], 1);
     c3 = sumarPolinomios(c3, cdr2[1], 1);
-    c4 = karatsuba0(c2, c3, k); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
-    result = karatsuba0(cdr1[1], cdr2[1], k); //(A(x)0 * B(x)0)
+    c4 = polCoefC(k);
+    c4 = karatsuba0(c2, c3, k, c4); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
+    result = karatsuba0(cdr1[1], cdr2[1], k, result); //(A(x)0 * B(x)0)
     c4 = sumarPolinomios(c4, c1, -1);
     c4 = sumarPolinomios(c4, result, -1); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0)) -
                                           //(A(x)1 * B(x)1) - (A(x)0 * B(x)0)
@@ -456,8 +497,53 @@ node *karatsuba(node *p1, node *p2, long l1,
     aux2 = coefXPol(1, k, c4, aux2); // c4^(2^(k-1))
     result = sumarPolinomios(result, aux1, 1);
     result = sumarPolinomios(result, aux2, 1);
+    c1 = eliminar(c1);
+    c2 = eliminar(c2);
+    c3 = eliminar(c3);
+    c4 = eliminar(c4);
+    aux1 = eliminar(aux1);
+    aux2 = eliminar(aux2);
+    cdr1[0] = eliminar(cdr1[0]);
+    cdr1[1] = eliminar(cdr1[1]);
+    cdr2[0] = eliminar(cdr2[0]);
+    cdr2[1] = eliminar(cdr2[1]);
     return elimSobrantes(result);
-  } else {
+
+  } else { // Caso solo para primer paso de karatsuba
+    if (p1->next && p2->next) {
+      splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
+      splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
+      c1 = polCoefC(cdr1[0]->grd + cdr2[0]->grd);
+      c1 = RyC(cdr1[0], cdr2[0], c1); //(A(x)1 * B(x)1)
+      c2 = sumarPolinomios(c2, cdr1[0], 1);
+      c2 = sumarPolinomios(c2, cdr1[1], 1);
+      c3 = sumarPolinomios(c3, cdr2[0], 1);
+      c3 = sumarPolinomios(c3, cdr2[1], 1);
+      c4 = polCoefC(c2->grd + c3->grd);
+      c4 = RyC(c2, c3, c4); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
+      result = RyC(cdr1[1], cdr2[1], result); //(A(x)0 * B(x)0)
+      c4 = sumarPolinomios(c4, c1, -1);
+      c4 =
+          sumarPolinomios(c4, result, -1); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0)) -
+                                           //(A(x)1 * B(x)1) - (A(x)0 * B(x)0)
+      aux1 = polCoefC(l + c1->grd);
+      aux1 = coefXPol(1, l, c1, aux1); //(A(x)1 * B(x)1)^(2^k)
+      aux2 = polCoefC(k + c4->grd);
+      aux2 = coefXPol(1, k, c4, aux2); // c4^(2^(k-1))
+      result = sumarPolinomios(result, aux1, 1);
+      result = sumarPolinomios(result, aux2, 1);
+      c1 = eliminar(c1);
+      c2 = eliminar(c2);
+      c3 = eliminar(c3);
+      c4 = eliminar(c4);
+      aux1 = eliminar(aux1);
+      aux2 = eliminar(aux2);
+      cdr1[0] = eliminar(cdr1[0]);
+      cdr1[1] = eliminar(cdr1[1]);
+      cdr2[0] = eliminar(cdr2[0]);
+      cdr2[1] = eliminar(cdr2[1]);
+      return elimSobrantes(result);
+    }
     return elimSobrantes(RyC(p1, p2, result));
   }
 }
@@ -600,7 +686,7 @@ void menu(node *head1, node *head2) {
         break;
       }
       time1 = clock();
-      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1);
+      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
       time1 = clock() - time1;
       aux = polCoefC(head1->grd + head2->grd);
       time2 = clock();
@@ -625,7 +711,7 @@ void menu(node *head1, node *head2) {
         break;
       }
       time1 = clock();
-      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1);
+      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
       time1 = clock() - time1;
       time2 = clock();
       aux = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
@@ -661,7 +747,7 @@ int main() {
   node *P = NULL;
   int f = 10;
   double t = 0.0;
-  FILE *fuerza = fopen("reduciryconquistar.csv", "a");
+  FILE *fuerza = fopen("Karatsuba-bajos.csv", "a");
   // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
   fclose(fuerza);
   while(t <= 22 && f <= 4096){
@@ -669,10 +755,10 @@ int main() {
   head2 = generator(f);
   t = clock();
   P = polCoefC( head1->grd + head2->grd);
-  P = RyC(head1, head2, P);
+  P = karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
-  fuerza = fopen("reduciryconquistar.csv", "a");
+  fuerza = fopen("Karatsuba-bajos.csv", "a");
   printf("%ld,%f\n", f, t);
   fprintf(fuerza , "%ld,%f\n", f, t);
   fclose(fuerza);
