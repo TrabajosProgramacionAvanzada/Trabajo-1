@@ -449,19 +449,7 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
   l = p1->grd + 1;
   for (k = 0; k < 24; k++) {
     if (p1->grd + 1 > pow2[k] && p1->grd + 1 < pow2[k + 1]) {//Caso en el que el largo de uno de los polinomios no sea una potencia de dos
-      aux3[1] = p1;
-      aux4[1] = p2;
-      cutin(aux3, p1->grd + 1 - pow2[k]);//Corto lo que excede a la potencia de dos más grande que sea menor al grado mayor del polinomio
-      cutin(aux4, p2->grd + 1 - pow2[k]);//en ambos polinomios queda aux3/4[0] = resto, aux3/4[1] = potencia de 2 mayor que "cabe" en el tamaño
-      c1 = polCoefC(aux3[0]->grd + aux4[0]->grd);//el resto se multiplica entre sí con reducir y conquistar
-      c1 = RyC(aux3[0], aux4[0], c1);
-      c2 = polCoefC(aux3[0]->grd + aux4[1]->grd);//Así como entre el resto y el largo potencia de dos
-      c2 = RyC(aux3[0], aux4[1], c2);
-      c3 = polCoefC(aux3[1]->grd + aux4[0]->grd);
-      c3 = RyC(aux4[0], aux3[1], c2);
-      result = karatsuba0(aux3[1], aux4[1], (aux3[1]->grd + 1), result);//la multiplicación entre las partes potencias de dos se pasan por karatsuba
-      result = sumarPolinomios(result, sumarPolinomios(c3, sumarPolinomios(c2, c1, 1), 1), 1); //result + (c3 + (c2 + c1)) y luego se suman todos los resultados
-      return elimSobrantes(result);
+      return RyC(p1, p2, result); //Ocupamos reducir y conquistar. uwu
     }
   }
   k = l / 2;
@@ -542,31 +530,34 @@ int main() {
   node *P1 = NULL;
   node *P2 = NULL;
   node *P3 = NULL;
-  long f = 10;
+  long f = 4;
   double t = 0;
-  P1 = generator(f);
-  P2 = generator(f); /*
-   push(&P1, 1, 0);
-   push(&P1, 1, 1);
-   push(&P1, 1, 2);
-   push(&P1, 1, 3);
-   push(&P2, 1, 0);
-   push(&P2, 1, 1);
-   push(&P2, 1, 2);
-   push(&P2, 1, 3);*/
-  printf("\nkaratsuba:\n");
-  t = clock();
-  P3 = karatsuba(P1, P2, P1->grd + 1, P2->grd + 1, 1);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo Karatsuba: %f\n", t);
-  display(&P3);
-  P3 = eliminar(P3);
-  t = clock();
-  P3 = polCoefC(P1->grd + P2->grd);
-  P3 = RyC(P1, P2, P3);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo Reducir y conquistar: %f\n", t);
+  //P1 = generator(f);
+  //P2 = generator(f); /*
+  push(&P1, 1, 0);
+  push(&P1, 1, 1);
+  push(&P1, 1, 2);
+  push(&P1, 1, 3);
+  push(&P1, 1, 4);
+  push(&P2, 1, 0);
+  push(&P2, 1, 1);
+  push(&P2, 1, 2);
+  push(&P2, 1, 3);
+  push(&P2, 1, 4);
+   t = clock();
+   P3 = polCoefC(P1->grd + P2->grd);
+   P3 = RyC(P1, P2, P3);
+   t = clock() - t;
+   t = t / CLOCKS_PER_SEC;
+   display(&P3);
+   P3 = eliminar(P3);
+   printf("\ntiempo Reducir y conquistar: %f\n", t);
+   printf("\nkaratsuba:\n");
+   t = clock();
+   P3 = karatsuba(P1, P2, P1->grd + 1, P2->grd + 1, 1);
+   t = clock() - t;
+   t = t / CLOCKS_PER_SEC;
+   printf("\ntiempo Karatsuba: %f\n", t);
+   display(&P3);
   return 0;
 }
