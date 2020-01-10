@@ -236,55 +236,7 @@ node *eliminar(node *head) {
   return head; // Debe retornar NULL
 }
 
-node *MultDivYConq0(node *p1, node *p2, long n, node *result) {
-  node *cdr1[2];
-  node *cdr2[2];
-  node *aux = NULL;
-  long k = n / 2;
-  long mayor = 0;
-  printf("\nentre!\n");
-  if (!result)
-    printf("\nno funciona!\n");
-  if (p1->next &&
-      p2->next) { // Si existen ambas continuaciones se sigue con la recursión
-    splitPoly(p1, cdr1, k); // cdr1[0] = A1(x) ; cdr1[1] = A0(x)
-    display(&cdr1[0]);
-    display(&cdr1[1]);
-    splitPoly(p2, cdr2, k); // cdr2[0] = B1(x) ; cdr2[1] = B0(X)
-    display(&cdr2[0]);
-    display(&cdr2[1]);
-    aux = MultDivYConq0(cdr1[0], cdr2[0], k, aux);
-    display(&result);
-    result = coefXPol(1, n, aux, result);
-    display(&result);
-    if (cdr1[0]->grd + cdr2[1]->grd <= cdr1[1]->grd + cdr2[0]->grd) {
-      mayor = cdr1[1]->grd + cdr2[0]->grd;
-    } else
-      mayor = cdr1[0]->grd + cdr2[1]->grd;
-    result =
-        coefXPol(1, k,
-                 sumarPolinomios(MultDivYConq0(cdr1[0], cdr2[1], k, result),
-                                 MultDivYConq0(cdr1[1], cdr2[0], k, result), 1),
-                 result);
-    display(&result);
-    result =
-        sumarPolinomios(result, MultDivYConq0(cdr1[1], cdr2[1], k, result), 1);
-    display(&result);
-  } else {
-    if (p1->next) {
-      printf("\np1 sigue\n");
-      result = coefXPol(p2->coef, p2->grd, p1, result);
-      display(&result);
-    } else {
-      printf("\np2 sigue o ambas no siguen\n");
-      if (!result)
-        printf("\nno funciona!\n");
-      result = coefXPol(p1->coef, p1->grd, p2, result);
-      display(&result);
-    }
-  }
-  return result;
-}
+
 
 node *MultDivYConq(node *p1, node *p2, long n1, long n2) {
   node *cdr1[2];
