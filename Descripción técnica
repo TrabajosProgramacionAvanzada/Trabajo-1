@@ -1,0 +1,15 @@
+Computador:
+- CPU: Intel Core i5-4210U 1,7 GHz - turbo boost to 2.7 GHz
+- RAM: 6 Gb, en dos tarjetas, una de 4 otra de 2
+Aspire v13 Acer
+
+Programa para los gráficos:
+- Spyder: IDE de iPython
+	*librerías: -numpy para el trabajo con las tablas
+				-pandas para la lectura de las tablas en formato csv
+				-matplotlib para generar las imágenes de gráficos
+
+Metodología:
+	Se ha escrito un progrmama ad-hoc que multiplica consecutivamente polinomios generados aleatoriamente 
+	con largos crecientes, tomandose los tiempos de ejecución de las funciones usadas y guardando en una tabla csv 
+	los largos de los polinomios (n) con su tiempo de ejecución (t)
