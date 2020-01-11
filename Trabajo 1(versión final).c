@@ -429,7 +429,7 @@ void cutin(node *cut[2], long long int rango){//Corta un polinomio en dos partes
   return;
 }
 
-node *karatsuba(node *p1, node *p2, long l1, long l2,
+node *Karatsuba(node *p1, node *p2, long l1, long l2,
                 int def) { // Primer paso de karatsuba
   long k = 0;
   long l = 0;
@@ -461,7 +461,7 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
   }
   k = l / 2;
   if (p1->next && p2->next &&
-      def != 0) {            // Caso para el paso inductivo de Karatsuba
+      def != 0 && l >= 1500) {            // Caso para el paso inductivo de Karatsuba
     splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
     splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
     c1 = polCoefC(k);
@@ -494,8 +494,8 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
     cdr2[1] = eliminar(cdr2[1]);
     return elimSobrantes(result);
 
-  } else { // Caso solo para primer paso de karatsuba
-    if (p1->next && p2->next) {
+  } else { // Caso si el largo debe ser pasado por reducir y conquistar o es sólo un paso de karatsuba
+    if (p1->next && p2->next && def == 0) {// Caso solo para primer paso de karatsuba
       splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
       splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
       c1 = polCoefC(cdr1[0]->grd + cdr2[0]->grd);
@@ -672,7 +672,7 @@ void menu(node *head1, node *head2) {
         break;
       }
       time1 = clock();
-      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
+      aux1 = Karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
       time1 = clock() - time1;
       aux = polCoefC(head1->grd + head2->grd);
       time2 = clock();
@@ -697,7 +697,7 @@ void menu(node *head1, node *head2) {
         break;
       }
       time1 = clock();
-      aux1 = karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
+      aux1 = Karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
       time1 = clock() - time1;
       time2 = clock();
       aux = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
@@ -731,25 +731,37 @@ int main() {
   node *head1 = NULL;
   node *head2 = NULL;
   node *P = NULL;
-  int f = 10;
+  int f = 1500;
   double t = 0.0;
-  FILE *fuerza = fopen("Karatsuba-bajos.csv", "a");
+  FILE *reducir = fopen("Reducir-final.csv", "a");
+  FILE *karatsuba = fopen("Karatsuba-final.csv", "a");
   // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
-  fclose(fuerza);
-  while(t <= 22 && f <= 4096){
+  fclose(reducir);
+  fclose(karatsuba);
+  while(t <= 120 && f < 4500){
   head1 = generator(f);
   head2 = generator(f);
   t = clock();
   P = polCoefC( head1->grd + head2->grd);
-  P = karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+  P = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
   t = clock() - t;
   t = t / CLOCKS_PER_SEC;
-  fuerza = fopen("Karatsuba-bajos.csv", "a");
-  printf("%ld,%f\n", f, t);
-  fprintf(fuerza , "%ld,%f\n", f, t);
-  fclose(fuerza);
+  karatsuba = fopen("Karatsuba-final.csv", "a");
+  printf("karatsuba: %ld,%f\n", f, t);
+  fprintf(karatsuba, "%ld,%f\n", f, t);
+  fclose(karatsuba);
   P = eliminar(P);
-  f = f + 10;
+  t = clock();
+  P = polCoefC( head1->grd + head2->grd);
+  P = RyC(head1, head2, P);
+  t = clock() - t;
+  t = t / CLOCKS_PER_SEC;
+  reducir = fopen("Reducir-final.csv", "a");
+  printf("reducir: %ld,%f\n", f, t);
+  fprintf(reducir , "%ld,%f\n", f, t);
+  fclose(reducir);
+  P = eliminar(P);
+  f = f + 2;
   }/*
   P = karatsuba(head1, head2, head1->grd+1, head2->grd+1);
   t = clock() - t;
