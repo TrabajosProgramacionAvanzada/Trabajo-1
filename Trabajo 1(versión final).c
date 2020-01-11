@@ -456,22 +456,7 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
   l = p1->grd + 1;
   for (k = 0; k < 24; k++) {
     if (p1->grd + 1 > pow2[k] && p1->grd + 1 < pow2[k + 1]) {//Caso en el que el largo de uno de los polinomios no sea una potencia de dos
-      aux3[1] = p1;
-      aux4[1] = p2;
-      cutin(aux3, p1->grd + 1 - pow2[k]);//Corto lo que excede a la potencia de dos más grande que sea menor al grado mayor del polinomio
-      cutin(aux4, p2->grd + 1 - pow2[k]);//en ambos polinomios queda aux3/4[0] = resto, aux3/4[1] = potencia de 2 mayor que "cabe" en el tamaño
-      c1 = polCoefC(aux3[0]->grd + aux4[0]->grd);//el resto se multiplica entre sí con reducir y conquistar
-      c1 = RyC(aux3[0], aux4[0], c1);
-      c2 = polCoefC(aux3[0]->grd + aux4[1]->grd);//Así como entre el resto y el largo potencia de dos
-      c2 = RyC(aux3[0], aux4[1], c2);
-      c3 = polCoefC(aux3[1]->grd + aux4[0]->grd);
-      c3 = RyC(aux4[0], aux3[1], c2);
-      result = karatsuba0(aux3[1], aux4[1], (aux3[1]->grd + 1), result);//la multiplicación entre las partes potencias de dos se pasan por karatsuba
-      result = sumarPolinomios(result, sumarPolinomios(c3, sumarPolinomios(c2, c1, 1), 1), 1); //result + (c3 + (c2 + c1)) y luego se suman todos los resultados
-      c1 = eliminar(c1);
-      c2 = eliminar(c2);
-      c3 = eliminar(c3);
-      return elimSobrantes(result);
+      return RyC(p1, p2, result); //Ocupamos reducir y conquistar. uwu
     }
   }
   k = l / 2;
@@ -547,6 +532,7 @@ node *karatsuba(node *p1, node *p2, long l1, long l2,
     return elimSobrantes(RyC(p1, p2, result));
   }
 }
+
 
 // FunciÃ³n que despliega un menÃº para el usuario
 
