@@ -368,6 +368,55 @@ node *elimSobrantes(node *p) {
 }
 
 
+node *karatsuba0(node *p1, node *p2, long l,
+                 node *result) { // Paso inductivo (recursivo) de karatsuba
+  long k = 0;
+  k = l / 2;
+  node *cdr1[2];
+  node *cdr2[2];
+  node *aux1 = NULL;
+  node *aux2 = NULL;
+  node *c1 = NULL;
+  node *c2 = NULL;
+  node *c3 = NULL;
+  node *c4 = NULL;
+  if (p1->next && p2->next) {
+    splitPolyK(p1, cdr1, k); // A(x)1*X^(2^(k-1)) && A(x)0
+    splitPolyK(p2, cdr2, k); // B(x)1*X^(2^(k-1)) && B(x)0
+    c1 = polCoefC(k);
+    c1 = karatsuba0(cdr1[0], cdr2[0], k, c1); //(A(x)1 * B(x)1)
+    c2 = sumarPolinomios(c2, cdr1[0], 1);
+    c2 = sumarPolinomios(c2, cdr1[1], 1);
+    c3 = sumarPolinomios(c3, cdr2[0], 1);
+    c3 = sumarPolinomios(c3, cdr2[1], 1);
+    c4 = polCoefC(k);
+    c4 = karatsuba0(c2, c3, k, c4); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0))
+    result = karatsuba0(cdr1[1], cdr2[1], k, result); //(A(x)0 * B(x)0)
+    c4 = sumarPolinomios(c4, c1, -1);
+    c4 = sumarPolinomios(c4, result, -1); //((A(x)1 + A(x)0)*(B(x)1 + B(x)0)) -
+                                          //(A(x)1 * B(x)1) - (A(x)0 * B(x)0)
+    aux1 = polCoefC(l + c1->grd);
+    aux1 = coefXPol(1, l, c1, aux1); //(A(x)1 * B(x)1)^(2^k)
+    aux2 = polCoefC(k + c4->grd);
+    aux2 = coefXPol(1, k, c4, aux2); // c4^(2^(k-1))
+    result = sumarPolinomios(result, aux1, 1);
+    result = sumarPolinomios(result, aux2, 1);
+    c1 = eliminar(c1);
+    c2 = eliminar(c2);
+    c3 = eliminar(c3);
+    c4 = eliminar(c4);
+    aux1 = eliminar(aux1);
+    aux2 = eliminar(aux2);
+    cdr1[0] = eliminar(cdr1[0]);
+    cdr1[1] = eliminar(cdr1[1]);
+    cdr2[0] = eliminar(cdr2[0]);
+    cdr2[1] = eliminar(cdr2[1]);
+    return result;
+  } else {
+    return RyC(p1, p2, result);
+  }
+}
+
 void cutin(node *cut[2], long long int rango){//Corta un polinomio en dos partes tales que la primera tenga n términos
   long long int c = rango;
   node *aux = NULL;
@@ -491,17 +540,17 @@ node *Karatsuba(node *p1, node *p2, long l1, long l2,
 void menu(node *head1, node *head2){
     int opcion=0;
     long grdo =0;
-    double time1=0;
-    double time2=0;
-    double time3=0;
+    double time1=0.0;
+    double time2=0.0;
+    double time3=0.0;
     node *resultado;
     node *resultado2;
     node *poliref;
     do{
 
-        printf("1. Multiplicar 2 polinomios Generados con Fuerza Bruta \n2. Multiplicar 2 Polinomios Generados con Reducir y Conquistar 
-          \n3. Multiplicar 2 polinomios Generados con Dividir y Conquistar \n4. Multiplicar 2 polinomios generados con Karatsuba 
-          \n5. Tiempo CPU de Karatsuba y Fuerza Bruta \n6. Comparar Resultados de polinomios \n7. opcion salir\n");
+        printf("1. Multiplicar 2 polinomios Generados con Fuerza Bruta \n2. Multiplicar 2 Polinomios Generados con Reducir y Conquistar" 
+          "\n3. Multiplicar 2 polinomios Generados con Dividir y Conquistar \n4. Multiplicar 2 polinomios generados con Karatsuba" 
+          "\n5. Tiempo CPU de Karatsuba y Fuerza Bruta \n6. Comparar Resultados de polinomios \n7. opcion salir\n");
         scanf("%d", &opcion);//Se guarda la opción ingresada
         switch(opcion){
         case 1:
@@ -514,8 +563,7 @@ void menu(node *head1, node *head2){
             resultado=multiplicarPolinomioFBrut(head1,head2);
             display(&resultado);
             resultado=eliminar(resultado);
-            free(grdo);
-
+            
             break;
         case 2:
             printf("Ingresa el Grado de los Polinomio\n");
@@ -528,9 +576,8 @@ void menu(node *head1, node *head2){
             resultado=RyC(head1,head2,poliref);
             display(&resultado);
             resultado=eliminar(resultado);
-            poliref=eliminar(poliref);
-            free(grdo);
-        case 3:
+	    break;
+	case 3:
             printf("Ingresa el Grado de los Polinomio\n");
             scanf("%ld",&grdo);
             head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
@@ -540,7 +587,6 @@ void menu(node *head1, node *head2){
             resultado=MultDivYConq(head1,head2,grdo,grdo);
             display(&resultado);
             resultado=eliminar(resultado);
-            free(grdo);
             break;
         case 4:
 
@@ -554,8 +600,7 @@ void menu(node *head1, node *head2){
             resultado=Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
             display(&resultado);
             resultado=eliminar(resultado);
-            free(grdo);           
-
+            
             break;
 
         case 5:
@@ -566,26 +611,25 @@ void menu(node *head1, node *head2){
             head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
             head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
             head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
-            time1=time(NULL);
+            time1=clock();
             resultado2=multiplicarPolinomioFBrut(head1,head2); 
-            time2=time(NULL);  
-            time1=(time1-time2)/1000000;
+            time1=(clock() - time2)/CLOCKS_PER_SEC;
+	    resultado=eliminar(resultado);
             resultado=polCoefC(head1->grd + head2->grd);
-            time2=time(NULL);
+            time2=clock();
             resultado=Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
-            time3=time(NULL);
-            time2=(time2-time3)/1000000;
+            time2=(clock() - time2)/CLOCKS_PER_SEC;
 
               printf("\nEl tiempo de ejecucion de la funcion por Fuerza bruta fue de "
-             "%ld \n",
+             "%f \n",
              time1);
               printf("\nEl tiempo de ejecucion de la funcion por Karatsuba "
-             "fue de %ld \n",
+             "fue de %f \n",
              time2);
-            resultado=eliminar(resultado);
-            resultado2=eliminar(resultado2);
-            free(grdo);           
-
+	      resultado2 = sumarPolinomios(resultado2, resultado, -1);
+	      resultado=eliminar(resultado);
+	      resultado2=eliminar(resultado2);
+            
             break;
 
          case 6: 
@@ -599,17 +643,14 @@ void menu(node *head1, node *head2){
             resultado2 = polCoefC( head1->grd + head2->grd);
             resultado2 = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
             poliref=sumarPolinomios(resultado, resultado2, -1);
-            if(poliref==0){
-              printf(" Los Polinomios son iguales\n");
-            }
-            else{
-              printf("ocurrio un error en la suma\n");
-            }
+	    printf("Diferencia entre multiplicacion clasica y karatsuba (si no hay diferencia no hay nada que imprimir) :");
+            display(&poliref); //Si no hay diferencia no imprime nada
             resultado=eliminar(resultado);
             resultado2=eliminar(resultado2);
-            free(grdo);
             break;
-                            
+
+	case 7:
+	  return;
         default:
             printf("Ingrese una opcion valida\n");
             break;
@@ -629,46 +670,6 @@ int main() {
   double t = 0.0;
   int op;
   printf("\n");
-  printf("Si deseas obtener los Graficos para al rededor de 4000 datos aleatorios presiona 1, Si desea realizar operaciones de polinomio presione 2\n");
-  scanf("%d", &op);
-  if(op==1){
-
-    FILE *reducir = fopen("Reducir-final.csv", "a");
-    FILE *karatsuba = fopen("Karatsuba-final.csv", "a");
-    // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
-    fclose(reducir);
-    fclose(karatsuba);
-    while(t <= 120 && f < 4500){
-    head1 = generator(f);
-    head2 = generator(f);
-    t = clock();
-    P = polCoefC( head1->grd + head2->grd);
-    P = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
-    t = clock() - t;
-    t = t / CLOCKS_PER_SEC;
-    karatsuba = fopen("Karatsuba-final.csv", "a");
-    printf("karatsuba: %ld,%f\n", f, t);
-    fprintf(karatsuba, "%ld,%f\n", f, t);
-    fclose(karatsuba);
-    P = eliminar(P);
-    t = clock();
-    P = polCoefC( head1->grd + head2->grd);
-    P = RyC(head1, head2, P);
-    t = clock() - t;
-    t = t / CLOCKS_PER_SEC;
-    reducir = fopen("Reducir-final.csv", "a");
-    printf("reducir: %ld,%f\n", f, t);
-    fprintf(reducir , "%ld,%f\n", f, t);
-    fclose(reducir);
-    P = eliminar(P);
-    f = f + 2;
-   }
-  }
-
-  else{
-
-    menu(head1,head2);
-  }
- 
+  menu(head1,head2);
   return 0;
 }

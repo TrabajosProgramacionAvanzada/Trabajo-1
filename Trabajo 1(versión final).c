@@ -68,19 +68,19 @@ void display(node **head) {
   while (temp != NULL) {  // Mientras el nodo temporal sea distinto de NULL
     if(temp->coef != 0){
       if (temp->coef > 0) { // Si el coeficiente es mayor que cero
-	if (temp->grd == 0) {
-	  printf("+ %ld ", temp->coef);
-	  temp = temp->next; // Mover al siguiente nodo en la lista.
-	  continue;
-	}
-	printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
+  if (temp->grd == 0) {
+    printf("+ %ld ", temp->coef);
+    temp = temp->next; // Mover al siguiente nodo en la lista.
+    continue;
+  }
+  printf("+ %ld x^%ld ", temp->coef, temp->grd); // Imprime con un signo mas
       } else {
-	if (temp->grd == 0) {
-	  printf("- %ld ", temp->coef * -1);
-	  temp = temp->next; // Mover al siguiente nodo en la lista.
-	  continue;
-	}
-	printf("- %ld x^%ld ", temp->coef * -1, temp->grd);
+  if (temp->grd == 0) {
+    printf("- %ld ", temp->coef * -1);
+    temp = temp->next; // Mover al siguiente nodo en la lista.
+    continue;
+  }
+  printf("- %ld x^%ld ", temp->coef * -1, temp->grd);
       }
     }
     temp = temp->next; // Mover al siguiente nodo en la lista.
@@ -367,6 +367,7 @@ node *elimSobrantes(node *p) {
   return aux;
 }
 
+
 node *karatsuba0(node *p1, node *p2, long l,
                  node *result) { // Paso inductivo (recursivo) de karatsuba
   long k = 0;
@@ -536,194 +537,128 @@ node *Karatsuba(node *p1, node *p2, long l1, long l2,
 
 // FunciÃ³n que despliega un menÃº para el usuario
 
-void menu(node *head1, node *head2) {
-  int opcion = 0;
-  double time1 = 0;
-  double time2 = 0;
-  double time3 = 0;
-  long grdo1 = 0;
-  long grdo2 = 0;
-  node *aux = NULL;
-  node *aux1 = NULL;
-  do {
-    printf(
-        "\n1. Generar un primer polinomio o ingresarlo \n2. Generar un segundo "
-        "polinomio o ingresarlo \n3. Multiplicar dos polinomios generados por "
-        "Fuerza Bruta y Reducir y conquistar, luego entrega la diferencia de "
-        "tiempo entre ambos metodos \n4. Multiplicar dos polinomios generados "
-        "por Fuerza Bruta y Dividir y conquistar, luego entrega la diferencia "
-        "de tiempo entre ambos metodos \n5. Multiplicar dos polinomios "
-        "generados por Reducir y conquistar y Karatsuba, luego entrega la "
-        "diferencia de tiempo entre ambos metodos \n6. Multiplicar dos "
-        "polinomios generados por Dividir y conquistar (de un solo paso) y "
-        "Karatsuba, luego entrega la diferencia de tiempo entre ambos metodos "
-        "\n7. Salir y eliminar polinomios.\n\nIngrese su opcion: ");
-    scanf("%d", &opcion); // Se guarda la opción ingresada
-    switch (opcion) {
-    case 1:
-      grdo1 = 0;
-      printf("\nIngrese el grado maximo del primer polinomio (ingresar de "
-             "nuevo un polinomio lo sobreescribe): \n");
-      scanf("%ld", &grdo1);
-      printf("\n%ld\n", grdo1);
-      printf("\nIngrese \"1\" si desea generar el polinomio, ingrese \"0\" si desea "
-             "ingresarlo manualmente: \n");
-      scanf("%ld", &opcion);
-      head1 = eliminar(head1);
-      if (opcion == 1) {
-	printf("\n%ld\n", grdo1);
-	printf("\n%ld\n", opcion);
-        head1 = generator(1000);
-      } else {
-	grdo2 = 0;
-        while (opcion <= grdo1) {
-          printf("\nIngrese el coeficiente del termino con grado %ld: \n",
-                 &opcion);
-          scanf("%ld", &grdo2); // Usamos a "grado2" como auxiliar
-          push(&head1, grdo2, opcion);
-          opcion++;
-        }
-      }
-      opcion = 1;
-      display(&head1);
-      break;
-    case 2:
-      grdo2 = 0;
-      printf("\nIngrese el grado maximo del segundo polinomio (ingresar de "
-             "nuevo un polinomio lo sobreescribe): \n");
-      scanf("%ld", &grdo2);
-      printf("\n%ld\n", grdo2);
-      printf("\nIngrese \"1\" si desea generar el polinomio, ingrese \"0\" si desea "
-             "ingresarlo manualmente: \n");
-      scanf("%ld", &opcion);
-      head1 = eliminar(head2);
-      if (opcion == 1) {
-      printf("\n%ld\n", grdo1);
-      printf("\n%ld\n", opcion);
-      head2 = generator(1000);
-      } else {
-	grdo1 = 0;
-        while (opcion <= grdo1) {
-          printf("\nIngrese el coeficiente del termino con grado %ld: \n",
-                 &opcion);
-          scanf("%ld", &grdo1); // Usamos a "grado1" como auxiliar
-          push(&head2, grdo1, opcion);
-          opcion++;
-        }
-      }
-      opcion = 2;
-      display(&head2);
-      break;
-    case 3:
-      if (!head1 || !head2) {
-        printf("\nNo ha ingresado al menos uno de los polinomios, debe "
-               "ingresarlos o generarlos antes de multiplicar!!\n");
-        break;
-      }
-      time1 = time(NULL);
-      aux = multiplicarPolinomioFBrut(head1, head2);
-      time2 = time(NULL);
-      time1 = (time1 - time2) / 1000000;
-      aux1 = polCoefC(head1->grd + head2->grd);
-      time2 = time(NULL);
-      aux1 = RyC(head1, head2, aux);
-      time3 = time(NULL);
-      time2 = (time2 - time3) / 1000000;
-      printf("\nLa diferencia entre ambos resultados es: \n");
-      aux1 = sumarPolinomios(aux1, aux, -1);
-      display(&aux1); // OJO si la diferencia da 0, no se imprime nada
-      printf("\nEl tiempo de ejecucion de la funcion por Fuerza bruta fue de "
-             "%ld \n",
-             time1);
-      printf("\nEl tiempo de ejecucion de la funcion por Reducir y conquistar "
-             "fue de %ld \n",
-             time2);
-      aux = eliminar(aux);
-      aux1 = eliminar(aux1);
-      break;
-    case 4:
-      if (!head1 || !head2) {
-        printf("\nNo ha ingresado al menos uno de los polinomios, debe "
-               "ingresarlos o generarlos antes de multiplicar!!\n");
-        break;
-      }
-      time1 = clock();
-      aux = multiplicarPolinomioFBrut(head1, head2);
-      time1 = clock() - time1;
-      time2 = clock();
-      aux1 = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
-      time2 = clock() - time2;
-      printf("\nLa diferencia entre ambos resultados es: \n");
-      aux1 = sumarPolinomios(aux1, aux, -1);
-      display(&aux1); // OJO si la diferencia da 0, no se imprime nada
-      printf("\nEl tiempo de ejecucion de la funcion por Fuerza bruta fue de "
-             "%ld \n",
-             (double)(time1/CLOCKS_PER_SEC));
-      printf("\nEl tiempo de ejecucion de la funcion por Dividir y conquistar "
-             "fue de %ld \n",
-             (double)time2/CLOCKS_PER_SEC);
-      aux = eliminar(aux);
-      aux1 = eliminar(aux1);
-      break;
-    case 5:
-      if (!head1 || !head2) {
-        printf("\nNo ha ingresado al menos uno de los polinomios, debe "
-               "ingresarlos o generarlos antes de multiplicar!!\n");
-        break;
-      }
-      time1 = clock();
-      aux1 = Karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
-      time1 = clock() - time1;
-      aux = polCoefC(head1->grd + head2->grd);
-      time2 = clock();
-      aux = RyC(head1, head2, aux);
-      time2 = clock() - time2;
-      printf("\nLa diferencia entre ambos resultados es: \n");
-      aux1 = sumarPolinomios(aux1, aux, -1);
-      display(&aux1); // OJO si la diferencia da 0, no se imprime nada
-      printf(
-          "\nEl tiempo de ejecucion de la funcion por Karatsuba fue de %ld \n",
-          (double)time1/CLOCKS_PER_SEC);
-      printf("\nEl tiempo de ejecucion de la funcion por Reducir y conquistar "
-             "fue de %ld \n",
-             (double)time2/CLOCKS_PER_SEC);
-      aux = eliminar(aux);
-      aux1 = eliminar(aux1);
-      break;
-    case 6:
-      if (!head1 || !head2) {
-        printf("\nNo ha ingresado al menos uno de los polinomios, debe "
-               "ingresarlos o generarlos antes de multiplicar!!\n");
-        break;
-      }
-      time1 = clock();
-      aux1 = Karatsuba(head1, head2, head1->grd + 1, head2->grd + 1, 1);
-      time1 = clock() - time1;
-      time2 = clock();
-      aux = MultDivYConq(head1, head2, head1->grd+1, head2->grd+1);
-      time2 = clock() - time2;
-      printf("\nLa diferencia entre ambos resultados es: \n");
-      aux1 = sumarPolinomios(aux1, aux, -1);
-      display(&aux1); // OJO si la diferencia da 0, no se imprime nada
-      printf(
-          "\nEl tiempo de ejecucion de la funcion por Karatsuba fue de %ld \n",
-          (double)time1/CLOCKS_PER_SEC);
-      printf("\nEl tiempo de ejecucion de la funcion por Dividir y conquistar "
-             "fue de %ld \n",
-             (double)time2/CLOCKS_PER_SEC);
-      aux = eliminar(aux);
-      aux1 = eliminar(aux1);
-      break;
-    case 7:
-      head1 = eliminar(head1); // Elimina la memoria antes de cerrar el programa
-      head2 = eliminar(head2);
-      break;
-    default:
-      printf("\n\n\n¡¡¡Ingrese una opcion valida!!!\n\n\n");
-      break;
-    }
+void menu(node *head1, node *head2){
+    int opcion=0;
+    long grdo =0;
+    double time1=0.0;
+    double time2=0.0;
+    double time3=0.0;
+    node *resultado;
+    node *resultado2;
+    node *poliref;
+    do{
 
-  } while (opcion != 7);
+        printf("1. Multiplicar 2 polinomios Generados con Fuerza Bruta \n2. Multiplicar 2 Polinomios Generados con Reducir y Conquistar" 
+          "\n3. Multiplicar 2 polinomios Generados con Dividir y Conquistar \n4. Multiplicar 2 polinomios generados con Karatsuba" 
+          "\n5. Tiempo CPU de Karatsuba y Fuerza Bruta \n6. Comparar Resultados de polinomios \n7. opcion salir\n");
+        scanf("%d", &opcion);//Se guarda la opción ingresada
+        switch(opcion){
+        case 1:
+            printf("Ingresa el Grado de Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            resultado=multiplicarPolinomioFBrut(head1,head2);
+            display(&resultado);
+            resultado=eliminar(resultado);
+            
+            break;
+        case 2:
+            printf("Ingresa el Grado de los Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            poliref=polCoefC(head1->grd + head2->grd);
+            resultado=RyC(head1,head2,poliref);
+            display(&resultado);
+            resultado=eliminar(resultado);
+	    break;
+	case 3:
+            printf("Ingresa el Grado de los Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            resultado=MultDivYConq(head1,head2,grdo,grdo);
+            display(&resultado);
+            resultado=eliminar(resultado);
+            break;
+        case 4:
+
+            printf("Ingresa el Grado de los Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            resultado=polCoefC(head1->grd + head2->grd);
+            resultado=Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+            display(&resultado);
+            resultado=eliminar(resultado);
+            
+            break;
+
+        case 5:
+
+            printf("Ingresa el Grado de Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            time1=clock();
+            resultado2=multiplicarPolinomioFBrut(head1,head2); 
+            time1=(clock() - time2)/CLOCKS_PER_SEC;
+	    resultado=eliminar(resultado);
+            resultado=polCoefC(head1->grd + head2->grd);
+            time2=clock();
+            resultado=Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+            time2=(clock() - time2)/CLOCKS_PER_SEC;
+
+              printf("\nEl tiempo de ejecucion de la funcion por Fuerza bruta fue de "
+             "%f \n",
+             time1);
+              printf("\nEl tiempo de ejecucion de la funcion por Karatsuba "
+             "fue de %f \n",
+             time2);
+	      resultado2 = sumarPolinomios(resultado2, resultado, -1);
+	      resultado=eliminar(resultado);
+	      resultado2=eliminar(resultado2);
+            
+            break;
+
+         case 6: 
+            printf("Ingresa el Grado de Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            resultado=multiplicarPolinomioFBrut(head1,head2);
+            resultado2 = polCoefC( head1->grd + head2->grd);
+            resultado2 = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+            poliref=sumarPolinomios(resultado, resultado2, -1);
+	    printf("Diferencia entre multiplicacion clasica y karatsuba (si no hay diferencia no hay nada que imprimir) :");
+            display(&poliref); //Si no hay diferencia no imprime nada
+            resultado=eliminar(resultado);
+            resultado2=eliminar(resultado2);
+            break;
+
+	case 7:
+	  return;
+        default:
+            printf("Ingrese una opcion valida\n");
+            break;
+
+        }
+
+    }while(opcion != 7);
+
 }
 
 int main() {
@@ -733,53 +668,9 @@ int main() {
   node *P = NULL;
   int f = 1500;
   double t = 0.0;
-  FILE *reducir = fopen("Reducir-final.csv", "a");
-  FILE *karatsuba = fopen("Karatsuba-final.csv", "a");
-  // fprintf(fuerza ,"%s,%s\n", "n" ,"t");
-  fclose(reducir);
-  fclose(karatsuba);
-  while(t <= 120 && f < 4500){
-  head1 = generator(f);
-  head2 = generator(f);
-  t = clock();
-  P = polCoefC( head1->grd + head2->grd);
-  P = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  karatsuba = fopen("Karatsuba-final.csv", "a");
-  printf("karatsuba: %ld,%f\n", f, t);
-  fprintf(karatsuba, "%ld,%f\n", f, t);
-  fclose(karatsuba);
-  P = eliminar(P);
-  t = clock();
-  P = polCoefC( head1->grd + head2->grd);
-  P = RyC(head1, head2, P);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  reducir = fopen("Reducir-final.csv", "a");
-  printf("reducir: %ld,%f\n", f, t);
-  fprintf(reducir , "%ld,%f\n", f, t);
-  fclose(reducir);
-  P = eliminar(P);
-  f = f + 2;
-  }/*
-  P = karatsuba(head1, head2, head1->grd+1, head2->grd+1);
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo karatsuba: %f", t);
-  P = eliminar(P);
-  t = clock();
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo Dividir y conquistar: %f", t);
-  P = eliminar(P);
-  t = clock();
-  t = clock() - t;
-  t = t / CLOCKS_PER_SEC;
-  printf("\ntiempo Reducir y conquistar: %f", t);
-  P = eliminar(P);
-  head1 = eliminar(head1);
-  head2 = eliminar(head2);
-  //menu(head1, head2);*/
+  int op;
+  printf("\n");
+  menu(head1,head2);
   return 0;
 }
+
