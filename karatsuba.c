@@ -491,12 +491,17 @@ node *Karatsuba(node *p1, node *p2, long l1, long l2,
 void menu(node *head1, node *head2){
     int opcion=0;
     long grdo =0;
+    double time1=0;
+    double time2=0;
+    double time3=0;
     node *resultado;
+    node *resultado2;
     node *poliref;
     do{
 
         printf("1. Multiplicar 2 polinomios Generados con Fuerza Bruta \n2. Multiplicar 2 Polinomios Generados con Reducir y Conquistar 
-          \n3. Multiplicar 2 polinomios Generados con Dividir y Conquistar \n3. Multiplicar 2 polinomios generados con Karatsuba\n4. opcion sair\n");
+          \n3. Multiplicar 2 polinomios Generados con Dividir y Conquistar \n4. Multiplicar 2 polinomios generados con Karatsuba 
+          \n5. Tiempo CPU de Karatsuba y Fuerza Bruta \n6. Comparar Resultados de polinomios \n7. opcion salir\n");
         scanf("%d", &opcion);//Se guarda la opción ingresada
         switch(opcion){
         case 1:
@@ -513,7 +518,7 @@ void menu(node *head1, node *head2){
 
             break;
         case 2:
-            printf("Ingresa el Grado de Polinomio\n");
+            printf("Ingresa el Grado de los Polinomio\n");
             scanf("%ld",&grdo);
             head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
             head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
@@ -526,7 +531,7 @@ void menu(node *head1, node *head2){
             poliref=eliminar(poliref);
             free(grdo);
         case 3:
-            printf("Ingresa el Grado de Polinomio\n");
+            printf("Ingresa el Grado de los Polinomio\n");
             scanf("%ld",&grdo);
             head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
             head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
@@ -539,7 +544,7 @@ void menu(node *head1, node *head2){
             break;
         case 4:
 
-            printf("Ingresa el Grado de Polinomio\n");
+            printf("Ingresa el Grado de los Polinomio\n");
             scanf("%ld",&grdo);
             head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
             head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
@@ -552,13 +557,66 @@ void menu(node *head1, node *head2){
             free(grdo);           
 
             break;
+
+        case 5:
+
+            printf("Ingresa el Grado de Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            time1=time(NULL);
+            resultado2=multiplicarPolinomioFBrut(head1,head2); 
+            time2=time(NULL);  
+            time1=(time1-time2)/1000000;
+            resultado=polCoefC(head1->grd + head2->grd);
+            time2=time(NULL);
+            resultado=Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+            time3=time(NULL);
+            time2=(time2-time3)/1000000;
+
+              printf("\nEl tiempo de ejecucion de la funcion por Fuerza bruta fue de "
+             "%ld \n",
+             time1);
+              printf("\nEl tiempo de ejecucion de la funcion por Karatsuba "
+             "fue de %ld \n",
+             time2);
+            resultado=eliminar(resultado);
+            resultado2=eliminar(resultado2);
+            free(grdo);           
+
+            break;
+
+         case 6: 
+            printf("Ingresa el Grado de Polinomio\n");
+            scanf("%ld",&grdo);
+            head1=eliminar(head1);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head2=eliminar(head2);//Eliminamos la memoria por si ya hay un polinomio creado en la lista
+            head1=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            head2=generator(grdo);//Genera un polinomio de grado n con coeficientes aleatorios
+            resultado=multiplicarPolinomioFBrut(head1,head2);
+            resultado2 = polCoefC( head1->grd + head2->grd);
+            resultado2 = Karatsuba(head1, head2, head1->grd+1, head2->grd+1, 1);
+            poliref=sumarPolinomios(resultado, resultado2, -1);
+            if(poliref==0){
+              printf(" Los Polinomios son iguales\n");
+            }
+            else{
+              printf("ocurrio un error en la suma\n");
+            }
+            resultado=eliminar(resultado);
+            resultado2=eliminar(resultado2);
+            free(grdo);
+            break;
+                            
         default:
             printf("Ingrese una opcion valida\n");
             break;
 
         }
 
-    }while(opcion != 4);
+    }while(opcion != 7);
 
 }
 
